@@ -1,6 +1,6 @@
 # Nómade · prototipo navegable
 
-Prototipo de 31 pantallas con acceso mediante cuentas individuales. Los datos operativos y financieros son ficticios; no se registran operaciones reales.
+Prototipo de 31 pantallas con acceso mediante cuentas individuales y borradores persistentes. Los registros de ejemplo son ficticios; los borradores no generan operaciones reales.
 
 ## Iniciar en Windows
 
@@ -21,6 +21,14 @@ Abre `http://127.0.0.1:3000` y selecciona el acceso de administrador. El primer 
 En **Usuarios y permisos**, el administrador puede crear usuarios con contraseña temporal. Cada usuario debe cambiarla en su primer ingreso y seleccionar el acceso de usuario. Ambos perfiles pueden cerrar sesión y cambiar su contraseña. La recuperación automática, el restablecimiento de contraseñas y las restricciones por obra todavía no están implementados.
 
 La base SQLite y las sesiones se guardan localmente en `data/`, excluida de Git. Respáldala y protégela; perderla implica perder las cuentas. No publiques ese directorio ni las variables de entorno.
+
+## Borradores
+
+Se pueden guardar y revisar borradores de obras, presupuestos, EEPP, ingresos, OC, OT, facturas, rendiciones, distribuciones, prorrateos, ajustes, cierres, proveedores, tareas y lotes de pago. Cada usuario ve sus propios borradores; los administradores ven los de todos. Se guardan con autor y fecha en la base local.
+
+Son documentos de preparación, no transacciones: las referencias se escriben como texto y no se vinculan ni validan contra otros registros. Guardar no aprueba un presupuesto, crea una orden operativa, asigna una tarea, registra un ingreso, ejecuta un pago ni cierra una obra. No se hacen cálculos, conciliaciones, comprobaciones de duplicidad ni notificaciones. Todavía no hay edición, eliminación o aprobación de borradores.
+
+La importación de archivos, extracción con IA, integraciones, conciliación, exportación y reportes definitivos siguen pendientes. Los formularios y reglas deben validarse antes de utilizar información real.
 
 ## Estructura
 

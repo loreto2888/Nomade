@@ -1,4 +1,4 @@
-/* Interactive, non-transactional prototype. All records below are fictional. */
+/* Example records are fictional; saved drafts are stored separately. */
 const sections = [
   { title: "General", ids: ["p02", "p03", "p04", "p05", "p06"] },
   { title: "Operación y finanzas", ids: ["p07", "p08", "p09", "p10", "p11", "p12", "p13", "p14", "p15"] },
@@ -36,7 +36,7 @@ function sidebar(id) {
       const m = modules[key];
       return `<a href="#${key}" class="nav-button ${key === id ? "active" : ""}" data-nav="${key}" ${key === id ? 'aria-current="page"' : ""}><span class="nav-icon" aria-hidden="true">${m.icon}</span><span>${escapeHTML(m.short || m.title)}</span><span class="nav-number">${key.toUpperCase()}</span></a>`;
     }).join("")}`).join("")}</nav>
-    <div class="side-bottom">◌ &nbsp; Entorno de demostración<br>&nbsp;&nbsp;&nbsp;&nbsp; Datos operativos ficticios</div>
+    <div class="side-bottom">◌ &nbsp; Entorno de demostración<br>&nbsp;&nbsp;&nbsp;&nbsp; Registros de ejemplo ficticios</div>
   </aside>`;
 }
 
@@ -49,11 +49,12 @@ function relatedNavigation(id) {
 }
 
 function strip() {
-  return `<div class="demo-strip"><span>◈</span><span><strong>Prototipo navegable.</strong> Datos operativos ficticios; no registra operaciones financieras.</span><button data-action="about">Conocer alcance →</button></div>`;
+  return `<div class="demo-strip"><span>◈</span><span><strong>Prototipo.</strong> Los borradores se guardan sin generar operaciones; los registros de ejemplo son ficticios.</span><button data-action="about">Conocer alcance →</button></div>`;
 }
 
 function heading(id, title, description, button, target) {
-  return `<div class="heading-row"><div><div class="eyebrow">${id.toUpperCase()} &nbsp; / &nbsp; Gestión de obras</div><h1>${escapeHTML(title)}</h1><p>${escapeHTML(description)}</p></div>${button ? `<button class="button primary" ${target ? `data-nav="${target}"` : `data-action="unavailable" data-label="${escapeHTML(button)}"`}>＋ &nbsp; ${escapeHTML(button)}</button>` : ""}</div>`;
+  const action = target ? `data-nav="${target}"` : Object.hasOwn(draftSchemas, id) ? `data-action="create-draft" data-screen="${id}"` : `data-action="unavailable" data-label="${escapeHTML(button)}"`;
+  return `<div class="heading-row"><div><div class="eyebrow">${id.toUpperCase()} &nbsp; / &nbsp; Gestión de obras</div><h1>${escapeHTML(title)}</h1><p>${escapeHTML(description)}</p></div>${button ? `<button class="button primary" ${action}>＋ &nbsp; ${escapeHTML(button)}${!target && Object.hasOwn(draftSchemas, id) ? " · borrador" : ""}</button>` : ""}</div>`;
 }
 
 function stat(label, value, foot, icon) {
@@ -80,13 +81,10 @@ function updateTable(m) {
   document.getElementById("table-count").textContent = `${rows.length} ${rows.length === 1 ? "registro" : "registros"} de ejemplo`;
 }
 
-function renderForm(m) {
-  return `<div class="form-grid">${m.form.map(([label, placeholder], index) => `<div class="field"><label for="field-${index}">${escapeHTML(label)}</label><input id="field-${index}" type="${placeholder === "date" ? "date" : "text"}" ${placeholder === "date" ? "" : `placeholder="${escapeHTML(placeholder)}"`}></div>`).join("")}</div><div class="notice">Los campos son solo ilustrativos. La información ingresada no se guarda ni se envía.</div><div class="form-actions"><button class="button primary" data-action="unavailable" data-label="${escapeHTML(m.action)}">${escapeHTML(m.action)}</button><button class="button" data-nav="${m.title.includes("EEPP") ? "p07" : "p03"}">Volver al listado</button></div>`;
-}
-
 function modulePage(id) {
   const m = modules[id];
-  return `${heading(id, m.title, m.description, m.form ? null : m.action, m.target)}${strip()}<div class="section-grid"><section class="card"><div class="card-head"><div><h2>${m.form ? "Información general" : "Registros de ejemplo"}</h2><p>${m.form ? "Completa los campos para explorar la pantalla" : "Consulta y filtra la información de esta vista"}</p></div><span class="badge neutral">Vista demo</span></div>${m.form ? renderForm(m) : renderTable(m)}</section><aside class="card"><div class="card-head"><div><h2>Sobre esta pantalla</h2><p>Consideraciones funcionales</p></div></div><ul class="info-list">${m.notes.map(note => { const [title, body] = note.split("|"); return `<li><strong>${escapeHTML(title)}</strong>${escapeHTML(body)}</li>`; }).join("")}</ul><div class="notice">La funcionalidad definitiva está sujeta a levantamiento y aprobación.</div>${relatedNavigation(id)}</aside></div>`;
+  const listId = draftLists[id] || (Object.hasOwn(draftSchemas, id) ? id : null);
+  return `${heading(id, m.title, m.description, m.form ? null : m.action, m.target)}${strip()}<div class="section-grid"><section class="card"><div class="card-head"><div><h2>${m.form ? "Información del borrador" : "Registros de ejemplo"}</h2><p>${m.form ? "Completa los campos para guardar un borrador" : "Consulta y filtra la información de esta vista"}</p></div><span class="badge neutral">Vista demo</span></div>${m.form ? draftForm(id, true) : renderTable(m)}</section><aside class="card"><div class="card-head"><div><h2>Sobre esta pantalla</h2><p>Consideraciones funcionales</p></div></div><ul class="info-list">${m.notes.map(note => { const [title, body] = note.split("|"); return `<li><strong>${escapeHTML(title)}</strong>${escapeHTML(body)}</li>`; }).join("")}</ul><div class="notice">La funcionalidad definitiva está sujeta a levantamiento y aprobación.</div>${relatedNavigation(id)}</aside></div>${listId ? draftList(listId) : ""}`;
 }
 
 function render() {
@@ -107,6 +105,8 @@ function render() {
     document.getElementById("table-search").addEventListener("input", () => updateTable(modules[id]));
     document.getElementById("table-filter").addEventListener("change", () => updateTable(modules[id]));
   }
+  const listId = draftLists[id] || (Object.hasOwn(draftSchemas, id) ? id : null);
+  if (listId) loadDrafts(listId);
   window.scrollTo(0, 0);
 }
 
@@ -152,8 +152,9 @@ document.addEventListener("click", event => {
     }
   }
   if (action === "menu-close") closeMenu();
-  if (action === "about") showDialog("Alcance del prototipo", "El acceso y la administración de cuentas son reales. Las pantallas operativas usan datos ficticios y no registran operaciones financieras. Las integraciones y reglas de negocio aún deben validarse.");
+  if (action === "about") showDialog("Alcance del prototipo", "El acceso, las cuentas y los borradores son persistentes. Los datos de ejemplo son ficticios: los borradores no generan pagos, aprobaciones, asignaciones ni movimientos. Las integraciones y reglas de negocio aún deben validarse.");
   if (action === "unavailable") showDialog(button.dataset.label || "Funcionalidad pendiente", "Esta acción es parte del alcance propuesto y aún no está implementada. No se guardó ni envió información. Su comportamiento y autorizaciones deben definirse antes del desarrollo.");
+  if (action === "create-draft") showDraftForm(button.dataset.screen);
   if (action === "logout") logout();
   if (action === "change-password") { passwordChangeRequested = true; render(); }
   if (action === "cancel-password") { passwordChangeRequested = false; render(); }
@@ -166,9 +167,9 @@ document.addEventListener("keydown", event => {
     document.querySelector(".mobile-menu").focus();
   }
   if (event.key === "Tab" && dialogRoot.firstChild) {
-    const buttons = [...dialogRoot.querySelectorAll("button")];
-    if (event.shiftKey && document.activeElement === buttons[0]) { event.preventDefault(); buttons[buttons.length - 1].focus(); }
-    else if (!event.shiftKey && document.activeElement === buttons[buttons.length - 1]) { event.preventDefault(); buttons[0].focus(); }
+    const controls = [...dialogRoot.querySelectorAll('button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), a[href]')];
+    if (event.shiftKey && document.activeElement === controls[0]) { event.preventDefault(); controls[controls.length - 1].focus(); }
+    else if (!event.shiftKey && document.activeElement === controls[controls.length - 1]) { event.preventDefault(); controls[0].focus(); }
   }
 });
 window.addEventListener("resize", closeMenu);

@@ -6,6 +6,7 @@ const path = require("node:path");
 const { DatabaseSync } = require("node:sqlite");
 const express = require("express");
 const helmet = require("helmet");
+const draftSchemas = require("./draft-schemas.js");
 
 const root = __dirname;
 const port = Number(process.env.PORT || 3000);
@@ -38,6 +39,14 @@ db.exec(`
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     expires_at INTEGER NOT NULL
   );
+  CREATE TABLE IF NOT EXISTS drafts (
+    id INTEGER PRIMARY KEY,
+    screen TEXT NOT NULL,
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    data_json TEXT NOT NULL,
+    created_at TEXT NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS drafts_screen_user ON drafts(screen, user_id);
 `);
 
 function validUsername(value) {
@@ -202,9 +211,70 @@ app.post("/api/users", requireUser, requireAdmin, (req, res) => {
   res.status(201).json({ ok: true });
 });
 
+function validateDraft(screen, input) {
+  const schema = draftSchemas[screen];
+  if (!input || typeof input !== "object" || Array.isArray(input)) return { error: "Los datos del borrador son inválidos." };
+  const names = new Set(schema.fields.map(field => field.name));
+  if (Object.keys(input).some(name => !names.has(name))) return { error: "El borrador contiene campos no permitidos." };
+  const data = {};
+  for (const field of schema.fields) {
+    const raw = input[field.name];
+    if (raw !== undefined && typeof raw !== "string") return { error: `El campo ${field.label} es inválido.` };
+    const value = (raw || "").trim();
+    if (!value) {
+      if (field.required) return { error: `Completa el campo ${field.label}.` };
+      data[field.name] = "";
+      continue;
+    }
+    if ((field.type === "text" || field.type === "textarea") && value.length > field.maxLength) {
+      return { error: `El campo ${field.label} es demasiado largo.` };
+    }
+    if (field.type === "select" && !field.options.includes(value)) return { error: `Selecciona una opción válida para ${field.label}.` };
+    if (field.type === "date") {
+      const date = new Date(`${value}T00:00:00Z`);
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(value) || Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== value) {
+        return { error: `La fecha de ${field.label} es inválida.` };
+      }
+    }
+    if (field.type === "number") {
+      const numeric = Number(value);
+      if (!/^(0|[1-9]\d*)$/.test(value) || !Number.isSafeInteger(numeric) || numeric < field.min || numeric > field.max) {
+        return { error: `El campo ${field.label} debe ser un número entero entre ${field.min} y ${field.max}.` };
+      }
+    }
+    data[field.name] = value;
+  }
+  if (screen === "p04" && data.termino < data.inicio) return { error: "La fecha de término no puede ser anterior a la fecha de inicio." };
+  if (screen === "p10" && data.tipo === "Pago parcial de OT" && !data.ot) return { error: "Indica la referencia de la OT para un pago parcial." };
+  return { data };
+}
+
+app.get("/api/drafts/:screen", requireUser, (req, res) => {
+  const { screen } = req.params;
+  if (!Object.hasOwn(draftSchemas, screen)) return res.status(404).json({ error: "Tipo de borrador desconocido." });
+  const rows = db.prepare(`SELECT drafts.id, drafts.data_json, drafts.created_at, users.username
+    FROM drafts JOIN users ON users.id = drafts.user_id
+    WHERE drafts.screen = ? AND (? = 'admin' OR drafts.user_id = ?)
+    ORDER BY drafts.id DESC`).all(screen, req.user.role, req.user.id);
+  res.json({ drafts: rows.map(row => ({ id: row.id, data: JSON.parse(row.data_json), createdAt: row.created_at, author: row.username })) });
+});
+
+app.post("/api/drafts/:screen", requireUser, (req, res) => {
+  const { screen } = req.params;
+  if (!Object.hasOwn(draftSchemas, screen)) return res.status(404).json({ error: "Tipo de borrador desconocido." });
+  const result = validateDraft(screen, req.body && req.body.data);
+  if (result.error) return res.status(400).json({ error: result.error });
+  const createdAt = new Date().toISOString();
+  const insert = db.prepare("INSERT INTO drafts (screen, user_id, data_json, created_at) VALUES (?, ?, ?, ?)")
+    .run(screen, req.user.id, JSON.stringify(result.data), createdAt);
+  res.status(201).json({ id: Number(insert.lastInsertRowid), createdAt });
+});
+
 app.get("/", (req, res) => res.sendFile(path.join(root, "index.html")));
 app.get("/index.html", (req, res) => res.sendFile(path.join(root, "index.html")));
 app.get("/app.js", (req, res) => res.sendFile(path.join(root, "app.js")));
+app.get("/draft-schemas.js", (req, res) => res.sendFile(path.join(root, "draft-schemas.js")));
+app.get("/drafts.js", (req, res) => res.sendFile(path.join(root, "drafts.js")));
 app.get("/styles.css", (req, res) => res.sendFile(path.join(root, "styles.css")));
 app.use("/screens", express.static(path.join(root, "screens"), { index: false, dotfiles: "deny" }));
 app.use((error, req, res, next) => {
