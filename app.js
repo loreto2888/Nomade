@@ -6,6 +6,39 @@ const sections = [
   { title: "Administración", ids: ["p22", "p23", "p24", "p25", "p26", "p27", "p28", "p29", "p30", "p31", "p01"] }
 ];
 
+const relatedScreens = {
+  p02: ["p03", "p07", "p10", "p28"],
+  p03: ["p04", "p05", "p06", "p18"],
+  p04: ["p03", "p05", "p06"],
+  p05: ["p03", "p06", "p07", "p10", "p18", "p19"],
+  p06: ["p05", "p24", "p10", "p18"],
+  p07: ["p08", "p09", "p05"],
+  p08: ["p07", "p09", "p05"],
+  p09: ["p07", "p16", "p18"],
+  p10: ["p11", "p12", "p17", "p30"],
+  p11: ["p10", "p22", "p17"],
+  p12: ["p10", "p17", "p30", "p16"],
+  p13: ["p15", "p23", "p16"],
+  p14: ["p05", "p06", "p15"],
+  p15: ["p14", "p16", "p18"],
+  p16: ["p09", "p12", "p17", "p18"],
+  p17: ["p11", "p10", "p12", "p30"],
+  p18: ["p05", "p06", "p16", "p19"],
+  p19: ["p05", "p17", "p18", "p20"],
+  p20: ["p19", "p18", "p21"],
+  p21: ["p18", "p20", "p16"],
+  p22: ["p10", "p11", "p24"],
+  p23: ["p24", "p13", "p26"],
+  p24: ["p06", "p22", "p23"],
+  p25: ["p26", "p27", "p31"],
+  p26: ["p25", "p27", "p28"],
+  p27: ["p25", "p26", "p30"],
+  p28: ["p07", "p12", "p17", "p31"],
+  p29: ["p12", "p11", "p23"],
+  p30: ["p10", "p12", "p17", "p16"],
+  p31: ["p03", "p25", "p26", "p28"]
+};
+
 // Each module keeps its own representative records and validation considerations.
 const modules = {
   p01: { title: "Acceso y sesión", icon: "◉" },
@@ -48,23 +81,33 @@ const currentId = () => {
   const id = location.hash.slice(1).toLowerCase();
   return Object.prototype.hasOwnProperty.call(modules, id) ? id : "p02";
 };
-const navigate = id => { location.hash = id; };
+const navigate = id => {
+  if (currentId() === id) {
+    closeMenu();
+    return;
+  }
+  location.hash = id;
+};
 const badgeClass = value => /pendiente|revisión|preparación|parcial|implementar/i.test(value) ? "warn" : /excepción|rechazado/i.test(value) ? "danger" : /cerrado|finalizado/i.test(value) ? "neutral" : "";
 const badge = value => `<span class="badge ${badgeClass(value)}">${escapeHTML(value)}</span>`;
 
 function sidebar(id) {
-  return `<div class="sidebar-overlay" data-action="menu-close"></div><aside class="sidebar" aria-label="Navegación principal">
+  return `<div class="sidebar-overlay" data-action="menu-close"></div><aside id="sidebar" class="sidebar" aria-label="Navegación principal" ${window.matchMedia("(max-width: 760px)").matches ? "inert" : ""}>
     <div class="brand"><div class="brand-mark">N</div><div class="brand-name">NÓMADE<small>GESTIÓN DE OBRAS</small></div></div>
     <nav class="side-scroll">${sections.map(section => `<div class="nav-title">${section.title}</div>${section.ids.map(key => {
       const m = modules[key];
-      return `<button class="nav-button ${key === id ? "active" : ""}" data-nav="${key}" ${key === id ? 'aria-current="page"' : ""}><span class="nav-icon" aria-hidden="true">${m.icon}</span><span>${escapeHTML(m.short || m.title)}</span><span class="nav-number">${key.toUpperCase()}</span></button>`;
+      return `<a href="#${key}" class="nav-button ${key === id ? "active" : ""}" data-nav="${key}" ${key === id ? 'aria-current="page"' : ""}><span class="nav-icon" aria-hidden="true">${m.icon}</span><span>${escapeHTML(m.short || m.title)}</span><span class="nav-number">${key.toUpperCase()}</span></a>`;
     }).join("")}`).join("")}</nav>
     <div class="side-bottom">◌ &nbsp; Entorno de demostración<br>&nbsp;&nbsp;&nbsp;&nbsp; Datos ficticios · Sin conexión</div>
   </aside>`;
 }
 
 function topbar(title) {
-  return `<header class="topbar"><div class="breadcrumbs"><button class="mobile-menu" data-action="menu" aria-label="Abrir menú">☰</button><span>Espacio de trabajo &nbsp; / &nbsp; <strong>${escapeHTML(title)}</strong></span></div><div class="top-right"><button class="top-action" data-nav="p28" aria-label="Ver alertas">♧<span class="dot"></span></button><div class="profile"><div class="avatar">DE</div><div class="profile-text"><strong>Usuario demo</strong><small>Vista de demostración</small></div></div></div></header>`;
+  return `<header class="topbar"><div class="breadcrumbs"><button class="mobile-menu" data-action="menu" aria-label="Abrir menú" aria-expanded="false" aria-controls="sidebar">☰</button><span>Espacio de trabajo &nbsp; / &nbsp; <strong>${escapeHTML(title)}</strong></span></div><div class="top-right"><button class="top-action" data-nav="p28" aria-label="Ver alertas">♧<span class="dot"></span></button><div class="profile"><div class="avatar">DE</div><div class="profile-text"><strong>Usuario demo</strong><small>Vista de demostración</small></div></div></div></header>`;
+}
+
+function relatedNavigation(id) {
+  return `<nav class="related" aria-label="Pantallas relacionadas"><div class="related-heading">Continuar en</div><div class="related-links">${relatedScreens[id].map(key => `<a href="#${key}" data-nav="${key}"><span>${escapeHTML(modules[key].short || modules[key].title)}</span><span aria-hidden="true">→</span></a>`).join("")}</div></nav>`;
 }
 
 function strip() {
@@ -92,7 +135,7 @@ function dashboard() {
     <div class="dashboard-grid"><section class="card"><div class="card-head"><div><h2>Resumen financiero</h2><p>Ingresos y costos de las obras · cifras ilustrativas</p></div><div class="chart-legend"><span><i class="legend-dot" style="background:#83ad83"></i>Ingresos</span><span><i class="legend-dot" style="background:#dce8d9"></i>Costos</span></div></div>
       <div class="chart" role="img" aria-label="Gráfico ilustrativo de ingresos y costos de junio a noviembre"><div class="chart-labels"><span>$ 100M</span><span>$ 75M</span><span>$ 50M</span><span>$ 25M</span><span>$ 0</span></div><div class="chart-body">${bars.map(([month, income, cost]) => `<div class="bar-group"><div class="bar" style="height:${income}%"></div><div class="bar cost" style="height:${cost}%"></div><span class="bar-label">${month}</span></div>`).join("")}</div></div></section>
       <section class="card"><div class="card-head"><div><h2>Distribución de costos</h2><p>Por categoría · datos ilustrativos</p></div><button class="text-link" data-nav="p18">Ver detalle ↗</button></div><div class="distribution"><div class="donut"><div class="donut-center"><strong>100%</strong>del costo</div></div><div class="dist-list"><div class="dist-item"><span><i class="legend-dot" style="background:#668f6d"></i>Materiales</span><strong>43%</strong></div><div class="dist-item"><span><i class="legend-dot" style="background:#a7c69b"></i>Subcontratos</span><strong>29%</strong></div><div class="dist-item"><span><i class="legend-dot" style="background:#eac198"></i>Mano de obra</span><strong>16%</strong></div><div class="dist-item"><span><i class="legend-dot" style="background:#e9eee5"></i>Otros gastos</span><strong>12%</strong></div></div></div></section></div>
-    <section class="card"><div class="card-head"><div><h2>Obras en seguimiento</h2><p>Estado general de tus proyectos</p></div><button class="text-link" data-nav="p03">Ver todas las obras →</button></div><div class="table-wrap"><table class="data-table"><thead><tr><th>Obra</th><th>Responsable</th><th>Avance</th><th>Ingresos</th><th>Estado</th></tr></thead><tbody>${rows.map(row => `<tr><td><div class="project-name"><span class="project-icon">▣</span><span>${row[0]}<small>${row[1]}</small></span></div></td><td>${row[2]}</td><td><div class="progress-cell"><div class="progress"><span style="width:${row[3]}%"></span></div><small>${row[3]}%</small></div></td><td>${row[4]}</td><td>${badge(row[5])}</td></tr>`).join("")}</tbody></table></div><div class="table-footer"><span>Mostrando 4 obras de ejemplo</span><button class="text-link" data-nav="p05">Abrir ficha de obra →</button></div></section>`;
+    <section class="card"><div class="card-head"><div><h2>Obras en seguimiento</h2><p>Estado general de tus proyectos</p></div><button class="text-link" data-nav="p03">Ver todas las obras →</button></div><div class="table-wrap"><table class="data-table"><thead><tr><th>Obra</th><th>Responsable</th><th>Avance</th><th>Ingresos</th><th>Estado</th></tr></thead><tbody>${rows.map((row, index) => `<tr><td><div class="project-name"><span class="project-icon">▣</span><span>${index === 0 ? `<a class="record-link" href="#p05" data-nav="p05">${row[0]}</a>` : row[0]}<small>${row[1]}</small></span></div></td><td>${row[2]}</td><td><div class="progress-cell"><div class="progress"><span style="width:${row[3]}%"></span></div><small>${row[3]}%</small></div></td><td>${row[4]}</td><td>${badge(row[5])}</td></tr>`).join("")}</tbody></table></div><div class="table-footer"><span>Mostrando 4 obras de ejemplo</span><button class="text-link" data-nav="p05">Abrir ficha de ejemplo →</button></div></section>${relatedNavigation("p02")}`;
 }
 
 function renderTable(m) {
@@ -104,7 +147,13 @@ function updateTable(m) {
   const search = document.getElementById("table-search").value.trim().toLocaleLowerCase("es");
   const filter = document.getElementById("table-filter").value;
   const rows = m.rows.filter(row => row.join(" ").toLocaleLowerCase("es").includes(search) && (!filter || row[row.length - 1] === filter));
-  document.getElementById("table-body").innerHTML = rows.map(row => `<tr>${row.map((cell, index) => `<td>${index === row.length - 1 ? badge(cell) : escapeHTML(cell)}</td>`).join("")}</tr>`).join("");
+  document.getElementById("table-body").innerHTML = rows.map(row => `<tr>${row.map((cell, index) => {
+    if (index === row.length - 1) return `<td>${badge(cell)}</td>`;
+    const exampleWork = currentId() === "p03" && index === 0 && row[0].startsWith("Local Parque Norte");
+    const componentTargets = { "Presupuesto aprobado": "p06", "Órdenes de compra": "p10", "Estados de pago": "p07", "Documentos pendientes": "p28" };
+    const target = exampleWork ? "p05" : currentId() === "p05" && index === 0 ? componentTargets[cell] : null;
+    return `<td>${target ? `<a class="record-link" href="#${target}" data-nav="${target}">${escapeHTML(cell)}</a>` : escapeHTML(cell)}</td>`;
+  }).join("")}</tr>`).join("");
   document.getElementById("table-empty").hidden = rows.length > 0;
   document.getElementById("table-count").textContent = `${rows.length} ${rows.length === 1 ? "registro" : "registros"} de ejemplo`;
 }
@@ -115,7 +164,7 @@ function renderForm(m) {
 
 function modulePage(id) {
   const m = modules[id];
-  return `${heading(id, m.title, m.description, m.form ? null : m.action, m.target)}${strip()}<div class="section-grid"><section class="card"><div class="card-head"><div><h2>${m.form ? "Información general" : "Registros de ejemplo"}</h2><p>${m.form ? "Completa los campos para explorar la pantalla" : "Consulta y filtra la información de esta vista"}</p></div><span class="badge neutral">Vista demo</span></div>${m.form ? renderForm(m) : renderTable(m)}</section><aside class="card"><div class="card-head"><div><h2>Sobre esta pantalla</h2><p>Consideraciones funcionales</p></div></div><ul class="info-list">${m.notes.map(note => { const [title, body] = note.split("|"); return `<li><strong>${escapeHTML(title)}</strong>${escapeHTML(body)}</li>`; }).join("")}</ul><div class="notice">La funcionalidad definitiva está sujeta a levantamiento y aprobación.</div></aside></div>`;
+  return `${heading(id, m.title, m.description, m.form ? null : m.action, m.target)}${strip()}<div class="section-grid"><section class="card"><div class="card-head"><div><h2>${m.form ? "Información general" : "Registros de ejemplo"}</h2><p>${m.form ? "Completa los campos para explorar la pantalla" : "Consulta y filtra la información de esta vista"}</p></div><span class="badge neutral">Vista demo</span></div>${m.form ? renderForm(m) : renderTable(m)}</section><aside class="card"><div class="card-head"><div><h2>Sobre esta pantalla</h2><p>Consideraciones funcionales</p></div></div><ul class="info-list">${m.notes.map(note => { const [title, body] = note.split("|"); return `<li><strong>${escapeHTML(title)}</strong>${escapeHTML(body)}</li>`; }).join("")}</ul><div class="notice">La funcionalidad definitiva está sujeta a levantamiento y aprobación.</div>${relatedNavigation(id)}</aside></div>`;
 }
 
 function login() {
@@ -145,24 +194,53 @@ function closeDialog() {
   if (lastFocused && lastFocused.isConnected) lastFocused.focus();
 }
 
+function closeMenu() {
+  const sidebar = document.querySelector(".sidebar");
+  if (!sidebar) return;
+  sidebar.classList.remove("open");
+  document.querySelector(".sidebar-overlay").classList.remove("show");
+  const isMobile = window.matchMedia("(max-width: 760px)").matches;
+  sidebar.inert = isMobile;
+  document.querySelector(".mobile-menu").setAttribute("aria-expanded", "false");
+}
+
 document.addEventListener("click", event => {
   const button = event.target.closest("[data-nav], [data-action]");
   if (!button) return;
-  if (button.dataset.nav) { navigate(button.dataset.nav); return; }
+  if (button.dataset.nav) {
+    if (button.tagName === "A" && (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0)) return;
+    event.preventDefault();
+    navigate(button.dataset.nav);
+    return;
+  }
   const action = button.dataset.action;
-  if (action === "menu") { document.querySelector(".sidebar").classList.add("open"); document.querySelector(".sidebar-overlay").classList.add("show"); }
-  if (action === "menu-close") { document.querySelector(".sidebar").classList.remove("open"); document.querySelector(".sidebar-overlay").classList.remove("show"); }
+  if (action === "menu") {
+    const sidebar = document.querySelector(".sidebar");
+    if (sidebar.classList.contains("open")) closeMenu();
+    else {
+      sidebar.inert = false;
+      sidebar.classList.add("open");
+      document.querySelector(".sidebar-overlay").classList.add("show");
+      button.setAttribute("aria-expanded", "true");
+    }
+  }
+  if (action === "menu-close") closeMenu();
   if (action === "about") showDialog("Alcance del prototipo", "Esta versión permite revisar las 31 pantallas con datos ficticios. No cuenta con base de datos, autenticación, permisos, integraciones ni operaciones financieras. El levantamiento de Laudus y las reglas de negocio aún deben validarse.");
   if (action === "unavailable") showDialog(button.dataset.label || "Funcionalidad pendiente", "Esta acción es parte del alcance propuesto y aún no está implementada. No se guardó ni envió información. Su comportamiento y autorizaciones deben definirse antes del desarrollo.");
   if (action === "close" || (action === "backdrop" && event.target === button)) closeDialog();
 });
 document.addEventListener("keydown", event => {
   if (event.key === "Escape" && dialogRoot.firstChild) closeDialog();
+  else if (event.key === "Escape" && document.querySelector(".sidebar.open")) {
+    closeMenu();
+    document.querySelector(".mobile-menu").focus();
+  }
   if (event.key === "Tab" && dialogRoot.firstChild) {
     const buttons = [...dialogRoot.querySelectorAll("button")];
     if (event.shiftKey && document.activeElement === buttons[0]) { event.preventDefault(); buttons[buttons.length - 1].focus(); }
     else if (!event.shiftKey && document.activeElement === buttons[buttons.length - 1]) { event.preventDefault(); buttons[0].focus(); }
   }
 });
+window.addEventListener("resize", closeMenu);
 window.addEventListener("hashchange", render);
 render();
