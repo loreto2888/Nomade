@@ -275,6 +275,7 @@ app.get("/index.html", (req, res) => res.sendFile(path.join(root, "index.html"))
 app.get("/app.js", (req, res) => res.sendFile(path.join(root, "app.js")));
 app.get("/draft-schemas.js", (req, res) => res.sendFile(path.join(root, "draft-schemas.js")));
 app.get("/drafts.js", (req, res) => res.sendFile(path.join(root, "drafts.js")));
+app.get("/prototype-actions.js", (req, res) => res.sendFile(path.join(root, "prototype-actions.js")));
 app.get("/styles.css", (req, res) => res.sendFile(path.join(root, "styles.css")));
 app.use("/screens", express.static(path.join(root, "screens"), { index: false, dotfiles: "deny" }));
 app.use((error, req, res, next) => {

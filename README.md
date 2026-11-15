@@ -30,6 +30,8 @@ Son documentos de preparación, no transacciones: las referencias se escriben co
 
 La importación de archivos, extracción con IA, integraciones, conciliación, exportación y reportes definitivos siguen pendientes. Los formularios y reglas deben validarse antes de utilizar información real.
 
+Las acciones de creación abren una pantalla de borrador independiente. Las acciones de conciliación, reportes, integraciones, importación, auditoría, parámetros y asistencia documental también tienen pantallas de propuesta: su vista previa es temporal, no se guarda ni ejecuta procesos. Los archivos seleccionados no se leen ni se envían.
+
 ## Estructura
 
 Las definiciones de pantallas se agrupan en `screens/` por acceso, dashboard, obras, pagos y compras, control y administración. `app.js` contiene la navegación y componentes compartidos; `server.js` sirve la aplicación y gestiona las cuentas. Usa el menú o «Continuar en» para recorrer las pantallas. La ficha de ejemplo corresponde solo a Local Parque Norte.

@@ -38,6 +38,7 @@ test("administra cuentas, protege sesiones y exige cambiar la contraseña tempor
   }
   try {
     assert.equal((await request("/api/users")).status, 401);
+    assert.equal((await fetch(`${origin}/prototype-actions.js`)).status, 200);
     assert.equal((await request("/data/nomade.sqlite")).status, 404);
     assert.equal((await request("/api/login", { method: "POST", requestOrigin: "https://otro.example", data: {} })).status, 403);
     assert.equal((await request("/api/login", { method: "POST", data: { username: "admin_test", password: adminPassword, role: "user" } })).status, 401);

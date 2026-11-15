@@ -16,11 +16,18 @@ let sessionReady = false;
 let passwordChangeRequested = false;
 const escapeHTML = value => String(value).replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
 const currentId = () => {
-  const id = location.hash.slice(1).toLowerCase();
+  const id = location.hash.slice(1).toLowerCase().split("/")[0];
   return Object.prototype.hasOwnProperty.call(modules, id) ? id : "p02";
 };
+const currentView = () => {
+  const [id, view, ...rest] = location.hash.slice(1).toLowerCase().split("/");
+  if (rest.length || id !== currentId()) return "";
+  if (view === "nuevo" && Object.hasOwn(draftSchemas, id) && !modules[id].form) return view;
+  if (view === "prototipo" && Object.hasOwn(prototypeActions, id)) return view;
+  return "";
+};
 const navigate = id => {
-  if (currentId() === id) {
+  if (location.hash.slice(1).toLowerCase() === id) {
     closeMenu();
     return;
   }
@@ -53,7 +60,8 @@ function strip() {
 }
 
 function heading(id, title, description, button, target) {
-  const action = target ? `data-nav="${target}"` : Object.hasOwn(draftSchemas, id) ? `data-action="create-draft" data-screen="${id}"` : `data-action="unavailable" data-label="${escapeHTML(button)}"`;
+  const destination = target || (Object.hasOwn(draftSchemas, id) ? `${id}/nuevo` : Object.hasOwn(prototypeActions, id) ? `${id}/prototipo` : null);
+  const action = destination ? `data-nav="${destination}"` : `data-action="unavailable" data-label="${escapeHTML(button)}"`;
   return `<div class="heading-row"><div><div class="eyebrow">${id.toUpperCase()} &nbsp; / &nbsp; Gestión de obras</div><h1>${escapeHTML(title)}</h1><p>${escapeHTML(description)}</p></div>${button ? `<button class="button primary" ${action}>＋ &nbsp; ${escapeHTML(button)}${!target && Object.hasOwn(draftSchemas, id) ? " · borrador" : ""}</button>` : ""}</div>`;
 }
 
@@ -84,7 +92,7 @@ function updateTable(m) {
 function modulePage(id) {
   const m = modules[id];
   const listId = draftLists[id] || (Object.hasOwn(draftSchemas, id) ? id : null);
-  return `${heading(id, m.title, m.description, m.form ? null : m.action, m.target)}${strip()}<div class="section-grid"><section class="card"><div class="card-head"><div><h2>${m.form ? "Información del borrador" : "Registros de ejemplo"}</h2><p>${m.form ? "Completa los campos para guardar un borrador" : "Consulta y filtra la información de esta vista"}</p></div><span class="badge neutral">Vista demo</span></div>${m.form ? draftForm(id, true) : renderTable(m)}</section><aside class="card"><div class="card-head"><div><h2>Sobre esta pantalla</h2><p>Consideraciones funcionales</p></div></div><ul class="info-list">${m.notes.map(note => { const [title, body] = note.split("|"); return `<li><strong>${escapeHTML(title)}</strong>${escapeHTML(body)}</li>`; }).join("")}</ul><div class="notice">La funcionalidad definitiva está sujeta a levantamiento y aprobación.</div>${relatedNavigation(id)}</aside></div>${listId ? draftList(listId) : ""}`;
+  return `${heading(id, m.title, m.description, m.form ? null : m.action, m.target)}${strip()}<div class="section-grid"><section class="card"><div class="card-head"><div><h2>${m.form ? "Información del borrador" : "Registros de ejemplo"}</h2><p>${m.form ? "Completa los campos para guardar un borrador" : "Consulta y filtra la información de esta vista"}</p></div><span class="badge neutral">Vista demo</span></div>${m.form ? draftForm(id) : renderTable(m)}</section><aside class="card"><div class="card-head"><div><h2>Sobre esta pantalla</h2><p>Consideraciones funcionales</p></div></div><ul class="info-list">${m.notes.map(note => { const [title, body] = note.split("|"); return `<li><strong>${escapeHTML(title)}</strong>${escapeHTML(body)}</li>`; }).join("")}</ul><div class="notice">La funcionalidad definitiva está sujeta a levantamiento y aprobación.</div>${relatedNavigation(id)}</aside></div>${listId ? draftList(listId) : ""}`;
 }
 
 function render() {
@@ -98,9 +106,11 @@ function render() {
     id = "p02";
     history.replaceState(null, "", "#p02");
   }
-  app.innerHTML = `<div class="app">${sidebar(id)}<main class="main">${topbar(modules[id].title)}<div class="content">${id === "p02" ? dashboard() : id === "p25" ? usersPage() : modulePage(id)}</div></main></div>`;
+  const view = currentView();
+  const content = view === "nuevo" ? draftPage(id) : view === "prototipo" ? prototypePage(id) : id === "p02" ? dashboard() : id === "p25" ? usersPage() : modulePage(id);
+  app.innerHTML = `<div class="app">${sidebar(id)}<main class="main">${topbar(modules[id].title)}<div class="content">${content}</div></main></div>`;
   if (id === "p25") loadUsers();
-  else if (modules[id].rows) {
+  else if (!view && modules[id].rows) {
     updateTable(modules[id]);
     document.getElementById("table-search").addEventListener("input", () => updateTable(modules[id]));
     document.getElementById("table-filter").addEventListener("change", () => updateTable(modules[id]));
@@ -154,7 +164,6 @@ document.addEventListener("click", event => {
   if (action === "menu-close") closeMenu();
   if (action === "about") showDialog("Alcance del prototipo", "El acceso, las cuentas y los borradores son persistentes. Los datos de ejemplo son ficticios: los borradores no generan pagos, aprobaciones, asignaciones ni movimientos. Las integraciones y reglas de negocio aún deben validarse.");
   if (action === "unavailable") showDialog(button.dataset.label || "Funcionalidad pendiente", "Esta acción es parte del alcance propuesto y aún no está implementada. No se guardó ni envió información. Su comportamiento y autorizaciones deben definirse antes del desarrollo.");
-  if (action === "create-draft") showDraftForm(button.dataset.screen);
   if (action === "logout") logout();
   if (action === "change-password") { passwordChangeRequested = true; render(); }
   if (action === "cancel-password") { passwordChangeRequested = false; render(); }

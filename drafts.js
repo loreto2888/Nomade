@@ -14,25 +14,20 @@ function draftField(field) {
   return `<div class="field">${label}<input id="${id}" name="${field.name}" type="${field.type}" ${limits} ${required}></div>`;
 }
 
-function draftForm(id, inline = false) {
+function draftForm(id) {
   const schema = draftSchemas[id];
+  const back = id === "p04" ? "p03" : id === "p08" ? "p07" : id;
   return `<form class="draft-form" data-draft="${id}"><div class="form-grid">${schema.fields.map(draftField).join("")}</div>
     <div class="notice">Solo se guarda un borrador. Las referencias son texto y no se validan ni vinculan; no se aprueba, asigna, paga ni cierra nada.</div>
-    <p class="form-message" role="status"></p><div class="form-actions"><button class="button primary" type="submit">Guardar borrador</button>${inline ? `<button class="button" type="button" data-nav="${id === "p04" ? "p03" : "p07"}">Volver al listado</button>` : '<button class="button" type="button" data-action="close">Cancelar</button>'}</div></form>`;
+    <p class="form-message" role="status"></p><div class="form-actions"><button class="button primary" type="submit">Guardar borrador</button><button class="button" type="button" data-nav="${back}">Volver al listado</button></div></form>`;
 }
 
 function draftList(id) {
   return `<section class="card drafts-card" data-draft-list="${id}"><div class="card-head"><div><h2>Borradores guardados</h2><p>${sessionUser.role === "admin" ? "Como administrador puedes revisar los borradores de todos los usuarios." : "Solo puedes revisar tus propios borradores; el administrador también puede verlos."}</p></div><span class="badge warn">Sin aprobar</span></div><div class="draft-list-content"><p class="form-hint">Cargando borradores...</p></div></section>`;
 }
 
-function showDraftForm(id) {
-  if (!Object.hasOwn(draftSchemas, id)) {
-    showDialog("Borrador no disponible", "No se encontró el formulario solicitado.");
-    return;
-  }
-  lastFocused = document.activeElement;
-  dialogRoot.innerHTML = `<div class="dialog-backdrop" data-action="backdrop"><section class="dialog draft-dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title"><div class="dialog-head"><h2 id="dialog-title">${escapeHTML(draftSchemas[id].title)}</h2><button class="close" type="button" data-action="close" aria-label="Cerrar">×</button></div><p>Completa la información para revisión posterior.</p>${draftForm(id)}</section></div>`;
-  dialogRoot.querySelector("input, select, textarea").focus();
+function draftPage(id) {
+  return `${heading(id, draftSchemas[id].title, "Completa la información para revisión posterior.", null)}${strip()}<div class="section-grid"><section class="card"><div class="card-head"><div><h2>Información del borrador</h2><p>Los campos marcados con * son obligatorios.</p></div><span class="badge warn">Sin aprobar</span></div>${draftForm(id)}</section><aside class="card"><div class="card-head"><div><h2>Revisión posterior</h2><p>Los datos quedan separados de los registros de ejemplo.</p></div></div><div class="notice">El borrador no genera operaciones ni vincula documentos.</div>${relatedNavigation(id)}</aside></div>${draftList(id)}`;
 }
 
 async function loadDrafts(id, success = false) {
