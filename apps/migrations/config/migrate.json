@@ -1,0 +1,11 @@
+{
+  "migrations-dir": "migrations",
+  "ignore-pattern": "([.].*|.*[.]md)",
+  "schema": "nomade",
+  "migrations-schema": "nomade",
+  "migrations-table": "pgmigrations",
+  "migration-file-language": "sql",
+  "migration-filename-format": "timestamp",
+  "check-order": true,
+  "advisory-lock-mode": "fail"
+}

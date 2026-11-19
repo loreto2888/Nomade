@@ -1,0 +1,48 @@
+# =============================================================================
+# Nómade — Docker Compose LOCAL (solo base de datos)
+# =============================================================================
+# Uso (desde la raíz del repo, con un .env copiado de .env.example):
+#   docker compose up -d --wait postgres     # npm run db:up
+#   docker compose down                      # npm run db:down
+#   docker compose down -v                   # borra el volumen (BD desde cero)
+#
+# Las migraciones NO corren aquí: se ejecutan con Node desde el host
+# (npm run db:migrate) contra localhost:${POSTGRES_PORT:-5437}.
+#
+# init-roles.sh solo se ejecuta la PRIMERA vez (volumen vacío). Si cambias
+# NOMADE_OWNER_PASSWORD / NOMADE_APP_PASSWORD después, haz `down -v` o
+# cambia las contraseñas con ALTER ROLE.
+# =============================================================================
+name: nomade
+
+services:
+  postgres:
+    image: postgres:18
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD en .env}
+      POSTGRES_DB: nomade
+      NOMADE_OWNER_PASSWORD: ${NOMADE_OWNER_PASSWORD:?Define NOMADE_OWNER_PASSWORD en .env}
+      NOMADE_APP_PASSWORD: ${NOMADE_APP_PASSWORD:?Define NOMADE_APP_PASSWORD en .env}
+      TZ: ${TZ:-America/Santiago}
+    ports:
+      - "${POSTGRES_PORT:-5437}:5432"
+    volumes:
+      # PostgreSQL 18+: la imagen oficial usa PGDATA=/var/lib/postgresql/18/docker
+      # y declara VOLUME /var/lib/postgresql. Se monta el directorio padre
+      # (no /var/lib/postgresql/data) para que futuras actualizaciones mayores
+      # (pg_upgrade --link) puedan convivir en el mismo volumen.
+      - pgdata:/var/lib/postgresql
+      - ./apps/migrations/docker/init-roles.sh:/docker-entrypoint-initdb.d/10-init-roles.sh:ro
+    healthcheck:
+      # -h 127.0.0.1: durante la inicialización el servidor temporal solo escucha
+      # por socket Unix; por TCP no responde hasta que init-roles.sh terminó.
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -p 5432 -U \"$$POSTGRES_USER\" -d nomade"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+volumes:
+  pgdata:

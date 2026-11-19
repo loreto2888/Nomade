@@ -1,16 +1,37 @@
 {
-  "name": "nomade-prototipo",
-  "version": "1.0.0",
+  "name": "nomade",
+  "version": "0.1.0",
+  "description": "Plataforma web de administración y control financiero de obras de Constructora Nómade",
   "private": true,
+  "license": "UNLICENSED",
   "engines": {
     "node": ">=24"
   },
+  "workspaces": [
+    "apps/backend",
+    "apps/frontend",
+    "apps/migrations"
+  ],
   "scripts": {
-    "start": "node server.js",
-    "test": "node --test"
+    "full": "npm run db:up && npm run db:migrate && concurrently -k -n backend,frontend -c blue,green \"npm:dev:backend\" \"npm:dev:frontend\"",
+    "dev:backend": "npm run start:dev -w apps/backend",
+    "dev:frontend": "npm run dev -w apps/frontend",
+    "db:up": "docker compose up -d --wait postgres",
+    "db:migrate": "npm run migrate:up -w apps/migrations",
+    "db:migrate:down": "npm run migrate:down -w apps/migrations",
+    "db:migration:create": "npm run migrate:create -w apps/migrations --",
+    "db:seed": "npm run seed -w apps/migrations",
+    "db:down": "docker compose down",
+    "db:reset": "docker compose down -v && npm run db:up && npm run db:migrate",
+    "api:generate": "npm run api:generate -w apps/frontend",
+    "prototipo": "npm --prefix apps/prototipo start",
+    "build": "npm run build --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "test:e2e": "npm run test:e2e --workspaces --if-present"
   },
-  "dependencies": {
-    "express": "^5.1.0",
-    "helmet": "^8.1.0"
+  "devDependencies": {
+    "concurrently": "10.0.7"
   }
 }

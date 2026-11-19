@@ -1,0 +1,22 @@
+{
+  "name": "@nomade/migrations",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Migraciones de PostgreSQL de la plataforma Nómade (node-pg-migrate)",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "migrate:up": "node-pg-migrate up --lock -f config/migrate.json",
+    "migrate:down": "node-pg-migrate down 1 --lock -f config/migrate.json",
+    "migrate:redo": "node-pg-migrate redo 1 --lock -f config/migrate.json",
+    "migrate:create": "node-pg-migrate create -f config/migrate.json",
+    "seed": "node-pg-migrate up --lock -f config/seed.json"
+  },
+  "dependencies": {
+    "dotenv": "18.0.10",
+    "node-pg-migrate": "9.0.0",
+    "pg": "8.23.1"
+  }
+}

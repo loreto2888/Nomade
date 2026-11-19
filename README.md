@@ -1,45 +1,118 @@
-# Nómade · prototipo navegable
+# Nómade
 
-Prototipo de 31 pantallas con acceso mediante cuentas individuales y borradores persistentes. Los registros de ejemplo son ficticios; los borradores no generan operaciones reales.
+Plataforma web de administración y control financiero de obras de Constructora Nómade (obras, presupuestos, compras, pagos, ingresos, costos, conciliación y cierres). Monorepo con npm workspaces.
 
-## Iniciar en Windows
+- Plan técnico: [`docs/plan-implementacion.md`](docs/plan-implementacion.md)
+- Despliegue en el servidor `dell-pc`: [`deploy/README.md`](deploy/README.md)
+- Prototipo navegable (referencia visual): [`apps/prototipo/README.md`](apps/prototipo/README.md)
 
-Requiere Node.js 24 o superior. En PowerShell, dentro de la carpeta del proyecto:
+## Requisitos
 
-```powershell
-npm install
-$env:ADMIN_USERNAME = Read-Host "Usuario del primer administrador"
-$secure = Read-Host "Contraseña inicial (mínimo 12 caracteres)" -AsSecureString
-$bstr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure)
-try { $env:ADMIN_PASSWORD = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($bstr) }
-finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($bstr) }
-npm start
-```
-
-Abre `http://127.0.0.1:3000` y selecciona el acceso de administrador. El primer administrador se crea solo si la base de datos está vacía. Las contraseñas no tienen valores predeterminados ni se guardan en el código. Al terminar el servidor con Ctrl+C, ejecuta `Remove-Item Env:\ADMIN_PASSWORD` en la misma terminal. Para inicios posteriores no es necesario proporcionar esas variables.
-
-En **Usuarios y permisos**, el administrador puede crear usuarios con contraseña temporal. Cada usuario debe cambiarla en su primer ingreso y seleccionar el acceso de usuario. Ambos perfiles pueden cerrar sesión y cambiar su contraseña. La recuperación automática, el restablecimiento de contraseñas y las restricciones por obra todavía no están implementados.
-
-La base SQLite y las sesiones se guardan localmente en `data/`, excluida de Git. Respáldala y protégela; perderla implica perder las cuentas. No publiques ese directorio ni las variables de entorno.
-
-## Borradores
-
-Se pueden guardar y revisar borradores de obras, presupuestos, EEPP, ingresos, OC, OT, facturas, rendiciones, distribuciones, prorrateos, ajustes, cierres, proveedores, tareas y lotes de pago. Cada usuario ve sus propios borradores; los administradores ven los de todos. Se guardan con autor y fecha en la base local.
-
-Son documentos de preparación, no transacciones: las referencias se escriben como texto y no se vinculan ni validan contra otros registros. Guardar no aprueba un presupuesto, crea una orden operativa, asigna una tarea, registra un ingreso, ejecuta un pago ni cierra una obra. No se hacen cálculos, conciliaciones, comprobaciones de duplicidad ni notificaciones. Todavía no hay edición, eliminación o aprobación de borradores.
-
-La importación de archivos, extracción con IA, integraciones, conciliación, exportación y reportes definitivos siguen pendientes. Los formularios y reglas deben validarse antes de utilizar información real.
-
-Las acciones de creación abren una pantalla de borrador independiente. Las acciones de conciliación, reportes, integraciones, importación, auditoría, parámetros y asistencia documental también tienen pantallas de propuesta: su vista previa es temporal, no se guarda ni ejecuta procesos. Los archivos seleccionados no se leen ni se envían.
+- Node.js 24 o superior (`.nvmrc`) y npm 11 o superior.
+- Docker con Compose v2 (PostgreSQL local).
+- Java 17 o superior, solo para `npm run api:generate`.
+- Puertos libres: 5437 (PostgreSQL), 3007 (backend) y 5177 (frontend).
 
 ## Estructura
 
-Las definiciones de pantallas se agrupan en `screens/` por acceso, dashboard, obras, pagos y compras, control y administración. `app.js` contiene la navegación y componentes compartidos; `server.js` sirve la aplicación y gestiona las cuentas. Usa el menú o «Continuar en» para recorrer las pantallas. La ficha de ejemplo corresponde solo a Local Parque Norte.
+```
+apps/
+  backend/      API NestJS + TypeORM               (workspace)
+  frontend/     React + Vite + MUI                 (workspace)
+  migrations/   node-pg-migrate: esquema y seeds   (workspace)
+  prototipo/    prototipo navegable antiguo        (fuera de los workspaces; lockfile propio)
+deploy/         backup y guía de despliegue
+docs/           plan y propuesta
+docker-compose.yml          PostgreSQL local (proyecto "nomade")
+docker-compose.deploy.yml   despliegue completo en dell-pc
+```
 
-## Antes de publicar en internet
+Un solo `package-lock.json` en la raíz para los tres workspaces.
 
-La configuración predeterminada escucha únicamente en `127.0.0.1`; no publica el sitio en internet. Para una instalación web se requiere infraestructura propia, HTTPS mediante un proxy inverso y `APP_ORIGIN` configurado con el origen HTTPS exacto. En producción, el servidor exige `NODE_ENV=production` y un origen HTTPS. Configura respaldos, monitoreo y controles de acceso en el servidor.
+## Primer arranque
 
-El límite de intentos se mantiene en memoria de un solo proceso y no sustituye protección distribuida. Antes de usar el sistema con datos reales se necesita una revisión de seguridad, recuperación de cuentas, reglas de permisos y una implementación transaccional. El prototipo no reemplaza Laudus ni implementa integraciones o protección por obra.
+1. Copiar los archivos de entorno y reemplazar los placeholders. Las contraseñas deben ser URL-safe, por ejemplo `node -e "console.log(require('crypto').randomBytes(24).toString('hex'))"`, y deben **coincidir** entre los tres archivos:
 
-Ejecuta las pruebas con `npm test`.
+   | Copiar | a | Contenido |
+   |---|---|---|
+   | `.env.example` | `.env` | contraseñas de PostgreSQL local (`postgres`, `nomade_owner`, `nomade_app`) |
+   | `apps/migrations/.env.example` | `apps/migrations/.env` | `DATABASE_URL` con `nomade_owner` |
+   | `apps/backend/.env.example` | `apps/backend/.env` | `DATABASE_URL` con `nomade_app`, `APP_ORIGIN`, Swagger, `ADJUNTOS_DIR` (opcional) |
+   | `apps/frontend/.env.example` | `apps/frontend/.env` | opcional (destino del proxy `/api`) |
+
+2. Instalar dependencias y arrancar todo:
+
+   ```sh
+   npm install
+   npm run full
+   ```
+
+   `full` levanta PostgreSQL y espera el healthcheck, aplica las migraciones y luego inicia el backend (http://localhost:3007, Swagger en `/api/docs`) y el frontend (http://localhost:5177) con `concurrently -k`: si uno de los dos termina, se detiene el otro. La tarjeta «Estado del sistema» de Inicio debe mostrar **API: OK** y **Base de datos: OK**. La base de datos sigue corriendo al salir; se detiene con `npm run db:down`.
+
+Las dependencias se agregan siempre desde la raíz: `npm install <paquete> -w apps/<app>`.
+
+## Cliente API (OpenAPI)
+
+El frontend usa un cliente `typescript-axios` generado desde el Swagger del backend y **versionado** en `apps/frontend/src/api/generated`. Cuando cambie un controlador o DTO del backend:
+
+```sh
+npm run dev:backend      # terminal 1 (Swagger habilitado en apps/backend/.env)
+npm run api:generate     # terminal 2, desde la raíz
+```
+
+Commitea `apps/frontend/src/api/generated` **en el mismo commit** que el cambio del backend. La generación es determinista (sin cambios en el backend no hay diff). Detalles: [`apps/frontend/README.md`](apps/frontend/README.md#cliente-api-generado).
+
+## Scripts raíz
+
+| Script | Qué hace |
+|---|---|
+| `full` | `db:up` → `db:migrate` → backend + frontend en paralelo |
+| `dev:backend` / `dev:frontend` | solo uno de los dos, en modo watch |
+| `db:up` / `db:down` | levanta o detiene PostgreSQL local |
+| `db:migrate` / `db:migrate:down` | aplica todas las migraciones o revierte la última |
+| `db:migration:create -- <nombre>` | crea una migración SQL nueva |
+| `db:seed` | carga los datos ficticios de `apps/migrations/seeds-dev` (solo local) |
+| `db:reset` | **borra el volumen** y recrea la BD con las migraciones |
+| `api:generate` | regenera el cliente OpenAPI del frontend (requiere el backend corriendo) |
+| `prototipo` | inicia el prototipo antiguo (http://localhost:3000) |
+| `build` / `lint` / `typecheck` / `test` / `test:e2e` | se ejecutan en todos los workspaces que tengan el script |
+
+Los archivos `.env` reales nunca se versionan.
+
+## Migraciones
+
+Todo desde la raíz, contra la BD local (`localhost:5437`, rol `nomade_owner` de `apps/migrations/.env`):
+
+```sh
+npm run db:migrate                         # aplica las pendientes
+npm run db:migrate:down                    # revierte la última
+npm run db:migration:create -- nombre      # crea apps/migrations/migrations/<timestamp>_nombre.sql
+npm run db:seed                            # datos ficticios de seeds-dev (solo local)
+```
+
+Convenciones, roles y detalles: [`apps/migrations/README.md`](apps/migrations/README.md).
+
+## Imágenes Docker
+
+Todas las imágenes se construyen con el **contexto en la raíz** del repo (un único `package-lock.json`) y el Dockerfile de cada app:
+
+```sh
+docker build -f apps/migrations/Dockerfile -t nomade-migrations .
+docker build -f apps/backend/Dockerfile    -t nomade-backend .
+docker build -f apps/frontend/Dockerfile   -t nomade-frontend .
+```
+
+El `.dockerignore` de la raíz es el único que aplica: excluye `.git`, todos los `node_modules`, `dist`, `coverage`, `.env*`, logs, `apps/prototipo`, `docs`, `deploy`, `data`, `backups` y `apps/migrations/seeds-dev`. Cada Dockerfile copia solo lo que necesita. `docker-compose.deploy.yml` usa `build: { context: ., dockerfile: apps/<app>/Dockerfile }` en `migrations`, `backend` y `web`.
+
+## Despliegue
+
+En el servidor `dell-pc` (Linux, Docker Compose v2), desde el repo clonado:
+
+```sh
+cp .env.deploy.example .env && chmod 600 .env      # cambiar TODAS las contraseñas
+docker compose -f docker-compose.deploy.yml --env-file .env up -d --build --wait
+```
+
+Orden: `postgres` (healthy) → `migrations` (exit 0) → `backend` (healthy) → `web` (nginx, puerto `WEB_PORT`, por defecto 80) + `backup` (dump diario). Swagger queda deshabilitado (`/api/docs-json` → 404). Actualización, logs, respaldo y restauración: [`deploy/README.md`](deploy/README.md).
+
+Para probar el despliegue en una máquina de desarrollo sin chocar con el entorno local, usa otro nombre de proyecto y otro puerto (p. ej. `-p nomade-deploycheck`, `WEB_PORT=58081`, `BACKUP_DIR` en una carpeta temporal) y termina con `down -v --rmi local`.
