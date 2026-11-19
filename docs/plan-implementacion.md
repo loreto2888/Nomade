@@ -1,6 +1,6 @@
 # Plan de implementación — Plataforma Nómade
 
-> Estado: **borrador v0.2 (18-11-2026)** · Autor: Coworlabs · Decisiones tomadas en [§0](#0-registro-de-decisiones) · Pendientes en [§16](#16-preguntas-abiertas).
+> Estado: **borrador v0.3 (19-11-2026)** · Autor: Coworlabs · Decisiones tomadas en [§0](#0-registro-de-decisiones) · Pendientes en [§16](#16-preguntas-abiertas).
 >
 > Fuentes:
 > - Prototipo navegable actual (se moverá a `apps/prototipo`: `index.html`, `app.js`, `screens/`, `server.js`, `styles.css`, `draft-schemas.js`, `prototype-actions.js`).
@@ -21,8 +21,19 @@
 | D-04 | 18-11-2026 | UI con **MUI** (Material UI + MUI X Community: DataGrid, Date Pickers, Charts). Sin Material React Table. |
 | D-05 | 18-11-2026 | Migraciones con **node-pg-migrate** en `apps/migrations` (workspace npm, Node). |
 | D-06 | 18-11-2026 | Prototipo actual se mueve a **`apps/prototipo`** (referencia ejecutable, fuera de los workspaces). |
-| D-07 | 18-11-2026 | Despliegue en **servidor Linux local**, accesible solo en la red local como **`http://dell-pc`** (HTTP, puerto 80). HTTPS queda como mejora posterior. |
-| D-08 | 18-11-2026 | **Fase 0 completada**: monorepo conectado, `npm run full`, cliente OpenAPI generado y versionado, imágenes con contexto raíz y compose de despliegue verificado. |
+| D-07 | 18-11-2026 | Despliegue en **servidor Linux local**, accesible solo en la red local como **`http://dell-pc`** (HTTP, puerto 80). HTTPS queda como mejora posterior. **Reemplazada por D-16** (Cloudflare Tunnel, HTTPS, puerto 5177). |
+| D-08 | 18-11-2026 | **Fase 0 completada**: monorepo conectado, `npm run full`, cliente OpenAPI generado y versionado, imágenes con contexto raíz y compose de despliegue verificado. Quedan confirmados por la implementación: TypeORM (C1), migraciones SQL (C3), versiones de §2 fijadas en el lockfile (C4) y generador `typescript-axios` (C5). |
+| D-09 | 19-11-2026 | **Alcance (A1–A7)**: sistema productivo por fases (las fases 0–3 sirven de demostración); se respeta el orden de §11; navegación según Anexo D; cada documento tiene su propio estado `borrador` (sin entidad genérica de borradores); las pantallas sin reglas (P23, P27, P29) se **muestran como «pendientes»**; una sola empresa (Constructora Nómade); sin fecha objetivo para la primera versión en el servidor. |
+| D-10 | 19-11-2026 | **Autoaprobación (B1)**: el `usuario` **no** puede aprobar lo que él mismo creó (OC, lote de pago, EEPP); el `admin` **sí** puede. |
+| D-11 | 19-11-2026 | **Usuarios y sesión (B2–B8)**: los administradores se definen al crear usuarios; la importación masiva (P24) es **solo admin**; inicio de sesión con **correo**; recuperación de contraseña por restablecimiento del admin con contraseña temporal (correo cuando haya SMTP); sesión de 8 h máximo y 30 min de inactividad; los usuarios solo se desactivan (no se eliminan); un admin no puede quitarse el rol ni desactivarse y siempre queda al menos un admin activo. |
+| D-12 | 19-11-2026 | **Idioma y UI (C2, C6–C9)**: código **todo en español** (dominio y nombres técnicos propios; se conservan en inglés solo los identificadores impuestos por librerías y frameworks); UI en español de Chile; actualización compartida con refetch + aviso de conflicto 409 (SSE posterior); exportación Excel (`exceljs`) y PDF (`pdfmake`); los códigos P01–P31 solo aparecen en documentación; **con modo oscuro** (tema claro y oscuro). |
+| D-13 | 19-11-2026 | **Base de datos (D1–D4)**: PK **`bigint generated always as identity`**; montos en **CLP y UF** (UF con su valor diario para convertir a CLP); borrado lógico en maestros y nunca en documentos financieros (anulación/reversa); no se migran datos del SQLite del prototipo. |
+| D-14 | 19-11-2026 | **OpenAPI (E1–E4)**: el único consumidor del cliente generado es el frontend; Swagger deshabilitado en el servidor (`SWAGGER_ENABLED=false`); **no** se verifica en CI que el cliente commiteado coincida con el backend; la regeneración es manual (`npm run api:generate`). |
+| D-15 | 19-11-2026 | **Entorno local (F1–F2)**: `npm run full` no baja PostgreSQL al detenerse; el desarrollo es **solo en Windows** (no se exige compatibilidad con macOS/Linux en los scripts de desarrollo). |
+| D-16 | 19-11-2026 | **Servidor (G1–G10)** — reemplaza parcialmente D-07: `dell-pc` ya tiene Docker y Docker Compose; el acceso es **solo mediante Cloudflare Tunnel** (ya configurado), sin acceso directo desde equipos de la red; el servicio web se publica en el puerto **5177** (no 80); el servidor tiene salida a internet y se despliega con `git pull` + `--build`; respaldos diarios con retención de 30 días (destino externo por definir); encendido 24/7 **sin UPS**; un solo ambiente; **HTTPS desde el inicio** (terminado por Cloudflare); adjuntos PDF/JPG/PNG/XLSX/CSV hasta 20 MB, sin antivirus en la primera etapa. |
+| D-17 | 19-11-2026 | **Reglas de negocio (H13, H14, H16, H17)**: solo el admin modifica datos bancarios de proveedores (auditado); los jefes de obra usan la plataforma desde terreno vía el túnel, por lo que la UI debe ser **responsive para celular**; los catálogos existen en Laudus/Excel y se pedirán al cliente; folios con **correlativo global por tipo de documento**. |
+| D-18 | 19-11-2026 | **Repositorio y proceso (I1–I5)**: commits directos a `main`, sin ramas ni PR salvo pedido explícito (`AGENTS.md`); CI con GitHub Actions; pruebas de reglas financieras, autorización y concurrencia obligatorias, más E2E de los flujos UAT; **mensajes de commit en español**; el `.docx` de la propuesta **se versiona** en git. |
+| D-19 | 19-11-2026 | **Prototipo (J1–J4)**: se conserva solo «Continuar en» (se eliminan la franja «Prototipo» y las notas «Sobre esta pantalla»); se mantienen sus validaciones (contraseña ≥ 12, textos 180/1000); el dashboard P02 parte con los indicadores de su ficha; `apps/prototipo` se elimina tras la fase 9. |
 
 ## 1. Objetivo y alcance
 
@@ -36,7 +47,7 @@ Construir la plataforma web multiusuario de administración y control financiero
 - Movimientos, conciliación/excepciones, resultado por obra, cierres de obra y anual, reportes.
 - Usuarios con rol **administrador** y **usuario** (D-02, D-03); auditoría transversal; control de concurrencia.
 
-Fuera de alcance de la primera versión (salvo que §16 diga lo contrario): emisión de DTE ante el SII, integración bancaria por API, IA documental (P29), MFA, perfiles finos y acceso por obra, HTTPS.
+Fuera de alcance de la primera versión (salvo que §16 diga lo contrario): emisión de DTE ante el SII, integración bancaria por API, IA documental (P29), MFA, perfiles finos y acceso por obra, multi-empresa.
 
 ## 2. Decisiones técnicas
 
@@ -116,7 +127,7 @@ Fuera de alcance de la primera versión (salvo que §16 diga lo contrario): emis
 | Backend NestJS | **3007** | 3007 solo en la red interna de Docker (no se publica) |
 | Frontend Vite (dev server) | **5177** | — (se sirve compilado por nginx) |
 | PostgreSQL | **5437** → 5432 | 5432 solo red interna; opcional `127.0.0.1:5437` para mantención |
-| Web (nginx: estáticos + proxy `/api`) | — | **80** → `http://dell-pc` |
+| Web (nginx: estáticos + proxy `/api`) | — | **5177** → publicado mediante Cloudflare Tunnel (HTTPS) (D-16) |
 | Prototipo (`apps/prototipo`) | 3000 (por defecto del prototipo) | — |
 
 Todos los puertos se parametrizan por variables (`BACKEND_PORT`, `FRONTEND_PORT`, `POSTGRES_PORT`, `WEB_PORT`) con esos valores por defecto. Nota: `puertos.md` registra 5437 en `Coworlabs/integracion-wom`; no levantar ambos a la vez (D-01).
@@ -159,7 +170,7 @@ En desarrollo, Vite hace **proxy** de `/api` → `http://localhost:3007`, de mod
 ```
 
 - `npm run full`: levanta PostgreSQL (espera el healthcheck), aplica migraciones con node-pg-migrate y luego inicia backend (watch) y frontend (Vite) en paralelo con `concurrently`; `-k` detiene ambos si uno cae. La BD queda corriendo al salir (se baja con `npm run db:down`).
-- Todos los scripts deben funcionar en **Windows (desarrollo)** y **Linux (servidor)**: sin comandos solo-bash; variables leídas desde `.env` (`dotenv-cli` donde haga falta).
+- Los scripts de desarrollo deben funcionar en **Windows** (D-15); los del servidor, en **Linux**. Variables leídas desde `.env` (`dotenv-cli` donde haga falta).
 
 ## 6. Base de datos y migraciones (`apps/migrations`)
 
@@ -173,8 +184,8 @@ En desarrollo, Vite hace **proxy** de `/api` → `http://localhost:3007`, de mod
 
 ### 6.2 Convenciones del esquema
 
-- Esquema `nomade`; tablas y columnas `snake_case`; PK `uuid` (`gen_random_uuid()`); `created_at/created_by/updated_at/updated_by`; columna `version integer` en todo documento editable (control optimista).
-- Montos CLP en `numeric(18,0)`; porcentajes en `numeric(7,4)`; IVA parametrizado (no constante en código).
+- Esquema `nomade`; tablas y columnas `snake_case`; PK `bigint generated always as identity` (D-13); `created_at/created_by/updated_at/updated_by`; columna `version integer` en todo documento editable (control optimista).
+- Montos CLP en `numeric(18,0)`; montos en UF en `numeric(18,4)` con su moneda explícita y conversión a CLP por el valor UF del día (tabla de valores UF); porcentajes en `numeric(7,4)`; IVA parametrizado (no constante en código).
 - Dos roles de BD creados por `docker/init-roles.sh` al inicializar PostgreSQL (contraseñas desde variables de entorno): `nomade_owner` (migraciones, DDL) y `nomade_app` (backend, solo DML). La tabla de auditoría solo permite `INSERT`/`SELECT` a `nomade_app` (append-only real).
 - Nunca se ponen contraseñas ni datos reales en migraciones. Datos de desarrollo en `seeds-dev/` (las obras ficticias del prototipo: Local Parque Norte, Oficinas Nueva Vista, Tienda Los Robles, Habilitación Providencia).
 
@@ -211,8 +222,8 @@ El detalle de columnas se cierra en cada fase (§11), no todo al inicio.
    - `output: src/api/generated`, `additionalProperties: { supportsES6, withSeparateModelsAndApi, useSingleRequestParameter }`.
    - Script: `"api:generate": "node scripts/generar-api.mjs"`, que invoca `openapi-generator-cli generate --generator-key nomade` con el directorio de trabajo fijado en `apps/frontend` (el CLI usa `PWD`/`INIT_CWD`, que desde la raíz apuntan a la raíz) y normaliza la salida a LF (requiere backend corriendo; usa Java local — ya instalado en la máquina de desarrollo. El modo `useDocker` no sirve con `localhost` porque apunta al contenedor).
 3. Las fuentes generadas **se commitean**. `.gitattributes` las marca `linguist-generated` y con `eol=lf` para evitar diffs Windows/Linux; ESLint/Prettier las ignoran.
-4. En runtime el cliente usa `basePath` relativo (`''`) + `withCredentials`, por lo que funciona igual en `localhost:5177` y en `http://dell-pc`.
-5. Regla de equipo: todo cambio de controlador/DTO va en el mismo commit que su cliente regenerado. CI lo verifica (§12).
+4. En runtime el cliente usa `basePath` relativo (`''`) + `withCredentials`, por lo que funciona igual en `localhost:5177` y detrás de Cloudflare Tunnel.
+5. Regla de equipo: todo cambio de controlador/DTO va en el mismo commit que su cliente regenerado. CI no lo verifica (D-14); es responsabilidad de quien hace el cambio.
 
 ## 8. Docker Compose
 
@@ -229,12 +240,13 @@ El detalle de columnas se cierra en cada fase (§11), no todo al inicio.
 | `postgres` | `postgres:18` | Volumen persistente, no publicado (o solo `127.0.0.1:5437`). Mismo `init-roles.sh`. |
 | `migrations` | build `apps/migrations` | One-shot: `migrate up` y termina. `depends_on: postgres (service_healthy)`. |
 | `backend` | build `apps/backend` | `depends_on: migrations (service_completed_successfully)`; healthcheck `/api/health`; volumen de adjuntos; usuario no root. |
-| `web` | build `apps/frontend` (multi-stage → nginx) | Sirve el build de Vite y hace proxy `/api` → `backend:3007`. Publica `${WEB_PORT:-80}:80`. Único servicio publicado. |
-| `backup` | `postgres:18` + cron | `pg_dump` diario + copia de adjuntos con retención (§16 G). |
+| `web` | build `apps/frontend` (multi-stage → nginx) | Sirve el build de Vite y hace proxy `/api` → `backend:3007`. Publica `${WEB_PORT}:80` con `WEB_PORT=5177` (D-16). Único servicio publicado; Cloudflare Tunnel apunta a él. |
+| `backup` | `postgres:18` + cron | `pg_dump` diario + copia de adjuntos, retención 30 días; destino externo por definir (§16 G). |
 
-- Acceso: `http://dell-pc` desde la red local. `APP_ORIGIN=http://dell-pc`, cookies sin `Secure` (`COOKIE_SECURE=false`) mientras sea HTTP (D-07). El backend valida `Origin` contra `APP_ORIGIN`.
+- Acceso: solo por **Cloudflare Tunnel** con HTTPS (D-16). `APP_ORIGIN` = URL pública del túnel (`https://…`), cookies con `Secure` (`COOKIE_SECURE=true`). El backend valida `Origin` contra `APP_ORIGIN`.
 - Despliegue previsto: en `dell-pc`, `git pull` → `docker compose -f docker-compose.deploy.yml --env-file .env up -d --build`. Secretos solo en `.env` del servidor (nunca en git); se entrega `.env.deploy.example`.
-- Si se quiere probar el compose de despliegue en Windows, se usa `WEB_PORT` distinto de 80.
+- Si se quiere probar el compose de despliegue en la misma máquina donde corre Vite, se usa un `WEB_PORT` distinto de 5177.
+- El servidor no tiene UPS (D-16): los respaldos y alertas deben tolerar reinicios (tareas idempotentes y recuperables al arrancar).
 
 ## 9. Backend (NestJS)
 
@@ -245,7 +257,7 @@ El detalle de columnas se cierra en cada fase (§11), no todo al inicio.
 | `auth` | P01 | login, logout, sesión, cambio de contraseña, bloqueo por intentos | todos |
 | `usuarios` | P25 | CRUD de usuarios, activar/desactivar, restablecer contraseña temporal | **admin** |
 | `obras`, `clientes` | P03–P05 | obra/centro de costo, ficha 360° (agregados) | todos |
-| `proveedores` | P22 | ficha, cuentas bancarias | todos |
+| `proveedores` | P22 | ficha; cuentas bancarias solo **admin** (D-17) | todos |
 | `presupuestos` | P06 | versiones, partidas, aprobación de versión | todos |
 | `cotizaciones`, `ordenes-trabajo` | P11 | cotización aprobada → OT, hitos porcentuales, saldo | todos |
 | `ordenes-compra` | P10, P30 | OC de materiales y parciales de OT, bandeja de aprobación | todos |
@@ -260,7 +272,7 @@ El detalle de columnas se cierra en cada fase (§11), no todo al inicio.
 | `alertas`, `tareas`, `actividad` | P28, P31 | vencimientos (factura a 30 días, aviso 5 días antes — Q10), tareas, actividad por obra | todos |
 | `reportes` | P02, P18, P21 | dashboard, resultado por obra, exportación Excel/PDF | todos |
 | `cierres` | P19, P20 | cierre de obra y anual, reapertura auditada | todos |
-| `importaciones` | P24 | carga Excel/CSV con previsualización y confirmación | todos (§16 B) |
+| `importaciones` | P24 | carga Excel/CSV con previsualización y confirmación | **admin** (D-11) |
 | `parametros` | P27 | reglas versionadas con vigencia | **admin** |
 | `migracion` | P23 | staging Laudus, conciliación, conector Rindegastos | **admin** |
 | `auditoria` | P26 | consulta de bitácora | **admin** |
@@ -272,9 +284,9 @@ El detalle de columnas se cierra en cada fase (§11), no todo al inicio.
 - **Concurrencia**: todo `PUT/PATCH` exige `version`; si no coincide → `409` con la versión vigente (P31). Transiciones críticas (aprobar OC, reservar factura en lote, confirmar pago, crear OC contra saldo OT) en transacción con `SELECT … FOR UPDATE` + restricciones únicas.
 - **Idempotencia**: cabecera `Idempotency-Key` en POST críticos; respuesta almacenada en `idempotencia`.
 - **Auditoría**: interceptor que registra actor, acción, entidad, id, antes/después (campos no sensibles), motivo, IP; append-only.
-- **Máquinas de estado** por documento (OC, OT, factura, lote, EEPP, quincena, cierre) con transiciones explícitas. Regla de no autoaprobación configurable (§16 B1).
+- **Máquinas de estado** por documento (OC, OT, factura, lote, EEPP, quincena, cierre) con transiciones explícitas. Regla de no autoaprobación para el rol `usuario`; el `admin` puede aprobar lo que creó (D-10).
 - **Errores** homogéneos en español (`ErrorResponse { codigo, mensaje, detalles[] }`), validación con `class-validator`, `ValidationPipe` con `whitelist` y `forbidNonWhitelisted`.
-- **Seguridad**: Helmet, rate limit en login (`@nestjs/throttler`), verificación de `Origin` en métodos no-GET, cookie `Secure` configurable (desactivada mientras se use HTTP en `dell-pc`), límites de tamaño, hash argon2id.
+- **Seguridad**: Helmet, rate limit en login (`@nestjs/throttler`), verificación de `Origin` en métodos no-GET, cookie `Secure` activada en el servidor (HTTPS por Cloudflare Tunnel), límites de tamaño, hash argon2id.
 - **Configuración** validada al arrancar (`@nestjs/config` + zod); falla rápido si falta una variable.
 - **Primer administrador**: se crea al arrancar si no existen usuarios, desde `ADMIN_EMAIL`/`ADMIN_PASSWORD` (mismo criterio del prototipo).
 
@@ -305,9 +317,11 @@ El **libro de movimientos** es la fuente de reportes. Cada hecho financiero gene
 | `text.primary` | `#243731`; secundario `#84928a` | |
 | `divider` | `#e7ece7` | |
 | `secondary` / acento | `#ec9b63`; foco `#efb37f` | alertas, foco visible |
-| Tipografía | DM Sans (texto) y Manrope (títulos), auto-alojadas con `@fontsource` | sin CDN externo (la red de `dell-pc` puede no tener internet) |
+| Tipografía | DM Sans (texto) y Manrope (títulos), auto-alojadas con `@fontsource` | sin CDN externo |
 
-Componentes de layout replicados con MUI: `Drawer` con secciones, `AppBar` blanca (75 px) con breadcrumbs, campana de alertas, avatar/nombre/rol, «Clave» y «Salir»; cabecera de página con *eyebrow*, título, descripción y botón primario; `Card` con cabecera; panel lateral «Continuar en» (pantallas relacionadas); `Chip` de estado con la misma semántica de color (pendiente/revisión = warning, excepción/rechazado = error, cerrado = neutral). Drawer temporal en móvil.
+La paleta anterior es el **tema claro**; se define además un **tema oscuro** equivalente con selector en la barra superior y preferencia guardada por usuario (D-12).
+
+Componentes de layout replicados con MUI: `Drawer` con secciones, `AppBar` blanca (75 px) con breadcrumbs, campana de alertas, avatar/nombre/rol, «Clave» y «Salir»; cabecera de página con *eyebrow*, título, descripción y botón primario; `Card` con cabecera; panel lateral «Continuar en» (pantallas relacionadas); `Chip` de estado con la misma semántica de color (pendiente/revisión = warning, excepción/rechazado = error, cerrado = neutral). Drawer temporal en móvil; las pantallas de uso en terreno deben funcionar en celular (D-17).
 
 ### 10.2 Componentes compartidos
 
@@ -326,7 +340,7 @@ Componentes de layout replicados con MUI: `Drawer` con secciones, `AppBar` blanc
 | Herramientas | `/importaciones` (P24) |
 | Administración (solo admin) | `/admin/usuarios` (P25) · `/admin/auditoria` (P26) · `/admin/parametros` (P27) · `/admin/migracion` (P23) |
 
-El menú «Administración» solo se muestra al administrador. Las rutas protegidas redirigen al login; el cambio de contraseña obligatorio bloquea el resto (igual que el prototipo). Se elimina el selector «Tipo de acceso» del login: el rol sale de la cuenta.
+El menú «Administración» solo se muestra al administrador. Las rutas protegidas redirigen al login; el cambio de contraseña obligatorio bloquea el resto (igual que el prototipo). Se elimina el selector «Tipo de acceso» del login: el rol sale de la cuenta. P23, P27 y P29 aparecen en el menú marcadas como «pendientes» hasta implementarse (D-09).
 
 ## 11. Fases de implementación
 
@@ -356,12 +370,12 @@ El despliegue en `dell-pc` puede hacerse desde la fase 1 para que el cliente pru
 - TypeScript `strict`, ESLint + Prettier, `npm run typecheck`.
 - Backend (Vitest): pruebas unitarias de reglas (saldos OT, suma 100 %, máquinas de estado) e **integración contra PostgreSQL real** (BD de prueba en el mismo compose o Testcontainers), incluyendo **pruebas de concurrencia** (dos aprobaciones simultáneas, misma factura en dos lotes) — UAT-08. Pruebas de autorización: un `usuario` recibe 403 en todos los endpoints de administración.
 - Frontend: Vitest + Testing Library para componentes y formularios; Playwright para flujos principales.
-- CI (GitHub Actions en `loreto2888/Nomade`): install → lint → typecheck → tests → levantar BD + migrar + backend → `api:generate` → `git diff --exit-code apps/frontend/src/api/generated` (el cliente commiteado debe coincidir con el backend) → build de imágenes Docker.
+- CI (GitHub Actions en `loreto2888/Nomade`): install → lint → typecheck → tests (con BD + migraciones) → build de imágenes Docker. Sin verificación del cliente generado (D-14).
 - Definición de listo por pantalla: la del Anexo F de la propuesta.
 
 ## 13. Seguridad y operación
 
-- Primera etapa en HTTP dentro de la red local (D-07). Riesgo aceptado: credenciales y datos viajan sin cifrar en la LAN; antes de operar con datos reales o exponer fuera de la red se habilita HTTPS (certificado interno) — la propuesta §6.2 lo exige.
+- Acceso solo mediante Cloudflare Tunnel con HTTPS desde el inicio (D-16), como exige la propuesta §6.2. Al quedar expuesta a internet, el login debe tener rate limit y bloqueo por intentos desde la fase 1; evaluar Cloudflare Access como capa adicional.
 - Contraseñas: mínimo 12 caracteres (como el prototipo), hash argon2id, bloqueo temporal por intentos, expiración por inactividad.
 - Datos bancarios de proveedores y nómina siempre auditados al consultarse o modificarse.
 - Respaldos diarios de BD y adjuntos, con **prueba de restauración** documentada antes del corte.
@@ -373,91 +387,31 @@ El despliegue en `dell-pc` puede hacerse desde la fase 1 para que el cliente pru
 |---|---|
 | Cobertura tributaria/contable de Laudus sin definir (DTE, libros) | No construir fases 10–11 sin la matriz 1:1; decidir módulo propio vs. servicio externo. |
 | Formato bancario desconocido | Generador de planilla con adaptador por banco; fase 6 bloqueada hasta tener ejemplo. |
-| Cliente generado desincronizado | Verificación en CI + regla de commit conjunto. |
+| Cliente generado desincronizado | Regla de commit conjunto (sin verificación en CI, D-14). |
 | Pago o aprobación duplicada por concurrencia | Transacciones, `FOR UPDATE`, índices únicos parciales, idempotencia y pruebas paralelas. |
-| Solo 2 roles: sin segregación de funciones (la propuesta la pide para pagos) | Regla de no autoaprobación configurable + auditoría; mapa de permisos preparado para perfiles. |
-| HTTP sin cifrar en la LAN | Uso solo en red local; HTTPS antes de datos reales. |
-| Resolución del nombre `dell-pc` desde todos los equipos | Confirmar DNS del router / mDNS / `hosts` (§16 G). |
+| Solo 2 roles: sin segregación de funciones (la propuesta la pide para pagos); el admin puede autoaprobar (D-10) | No autoaprobación para `usuario` + auditoría de toda aprobación; mapa de permisos preparado para perfiles. |
+| Plataforma expuesta a internet vía túnel | HTTPS, rate limit y bloqueo en login, cookies `Secure`, evaluar Cloudflare Access. |
+| Servidor sin UPS | Respaldos diarios fuera del servidor; tareas programadas recuperables tras un corte. |
 | Generador OpenAPI requiere Java | Documentado; Java ya presente en desarrollo; CI usa `setup-java`. |
-| Diferencias de fin de línea Windows/Linux | `.gitattributes` con `eol=lf`. |
+| Diferencias de fin de línea Windows (desarrollo) / Linux (servidor) | `.gitattributes` con `eol=lf`. |
 | Puerto 5437 compartido con `integracion-wom` | No levantar ambos; `POSTGRES_PORT` configurable. |
 
 ## 15. Próximos pasos
 
-1. Responder §16 B y C (mínimo B1–B3, C1–C2) para cerrar las fases 0–1.
-2. Ejecutar la fase 0 en una rama y validar `npm run full` en Windows y el compose de despliegue en `dell-pc`.
-3. Enviar al cliente las preguntas de §16 H que bloquean las fases 4–11.
+1. Ajustar lo ya construido a las decisiones D-13 y D-16: PK `bigint` en las migraciones nuevas, `WEB_PORT=5177`, `APP_ORIGIN` con la URL del túnel y `COOKIE_SECURE=true` en `.env.deploy.example`.
+2. Iniciar la fase 1 (identidad y acceso), ya desbloqueada por D-10 y D-11.
+3. Pedir al cliente los catálogos (H16) y enviarle las preguntas de §16 H que bloquean las fases 3–11.
 
 ---
 
 ## 16. Preguntas abiertas
 
-Cada pregunta indica el **supuesto actual** con el que avanza el plan si no hay respuesta. Al responder, se mueve a §0 y se elimina de aquí.
-
-### A. Alcance y prioridades
-
-- **A1.** ¿El objetivo de esta implementación es el sistema productivo completo (reemplazo de Laudus) o primero un MVP funcional para validar con el cliente antes de cotizar? *Supuesto: sistema productivo por fases; fases 0–3 sirven también de demostración.*
-- **A2.** ¿Se respeta el orden de fases de §11 o el cliente necesita antes algún módulo concreto (p. ej., OC y pagos masivos, que hoy hace en Laudus)? *Supuesto: orden de §11.*
-- **A3.** ¿Las pantallas se reorganizan según el menú del Anexo D (P05 como ficha con pestañas, P30 que combina bandeja de OC y lotes)? *Supuesto: sí, Anexo D.*
-- **A4.** ¿Se mantiene el concepto de «borradores» del prototipo como entidad genérica (JSON por pantalla) o cada documento real tiene estado `borrador` en su propia tabla? *Supuesto: estado `borrador` en cada documento.*
-- **A5.** ¿Las pantallas sin reglas aún (P23, P27, P29) se muestran como «pendientes» o se ocultan hasta implementarse? *Supuesto: se ocultan.*
-- **A6.** ¿Se requiere multi-empresa (varias razones sociales) o solo Constructora Nómade? *Supuesto: una empresa.*
-- **A7.** ¿Hay fecha objetivo para tener una primera versión en `dell-pc`?
-
-### B. Roles y usuarios
-
-- **B1.** Con solo 2 roles y el usuario pudiendo aprobar: ¿alguien puede aprobar algo que **él mismo creó** (OC, lote de pago, EEPP)? La propuesta pide segregación para pagos. *Supuesto: no se permite la autoaprobación, ni siquiera al administrador; parámetro para desactivarla.*
-- **B2.** ¿Quiénes serán administradores? (El cliente nombró a Pedro Muñoz como aprobador general y a Jorge Andrés como aprobador de lotes de pago y facturas de venta.) *Supuesto: el administrador lo define al crear usuarios.*
-- **B3.** ¿La importación masiva (P24) es para todos o solo admin? *Supuesto: todos (D-03 solo excluye P23, P25, P26, P27).*
-- **B4.** ¿El inicio de sesión es con **correo** (propuesta P01) o con **nombre de usuario** (prototipo)? *Supuesto: correo.*
-- **B5.** Recuperación de contraseña: sin SMTP, ¿basta con que el administrador restablezca y entregue una contraseña temporal? *Supuesto: sí; correo cuando haya SMTP.*
-- **B6.** Duración de sesión y expiración por inactividad. *Supuesto: 8 h máximas (prototipo) y 30 min de inactividad.*
-- **B7.** ¿Los usuarios se pueden eliminar o solo desactivar? *Supuesto: solo desactivar.*
-- **B8.** ¿Un administrador puede quitarse a sí mismo el rol o desactivarse? *Supuesto: no; debe quedar al menos un administrador activo.*
-
-### C. Stack y convenciones
-
-- **C1.** ORM del backend: ¿TypeORM, o preferirías Kysely / MikroORM / Drizzle (node-pg-migrate es independiente del ORM)? *Supuesto: TypeORM.*
-- **C2.** Idioma del código: ¿nombres de dominio en español (`ordenCompra`, `/api/ordenes-compra`) y técnicos en inglés, o todo en inglés? *Supuesto: dominio en español, técnico en inglés; UI en español de Chile.*
-- **C3.** Migraciones en **SQL** (con secciones Up/Down) o en **TypeScript** con el *builder* de node-pg-migrate? *Supuesto: SQL; TS solo cuando haga falta lógica.*
-- **C4.** ¿Versiones mayores a fijar (Nest, React, Vite, MUI, PostgreSQL 18)? *Supuesto: últimas estables al iniciar la fase 0, fijadas en el lockfile.*
-- **C5.** Generador del cliente: ¿`typescript-axios` o `typescript-fetch`? *Supuesto: `typescript-axios`.*
-- **C6.** Actualización compartida (P31): ¿basta refrescar al enfocar y cada N segundos, o se requieren eventos en tiempo real (SSE/WebSocket)? *Supuesto: refetch + aviso de conflicto 409; SSE posterior.*
-- **C7.** Exportaciones: ¿Excel (`exceljs`) y PDF (`pdfmake`)? *Supuesto: sí.*
-- **C8.** ¿Se muestran los códigos P01–P31 en la interfaz (como el prototipo) o solo en documentación? *Supuesto: solo en documentación.*
-- **C9.** ¿Modo oscuro? *Supuesto: no.*
-
-### D. Base de datos
-
-- **D1.** ¿Claves primarias `uuid` o `bigint` identity? *Supuesto: `uuid`.*
-- **D2.** ¿Montos solo en CLP o también UF/USD (contratos en UF son comunes en construcción)? *Supuesto: solo CLP.*
-- **D3.** ¿Borrado lógico en maestros y nunca en documentos financieros (anulación/reversa)? *Supuesto: sí.*
-- **D4.** ¿Hay datos en `data/nomade.sqlite` del prototipo que deban migrarse? *Supuesto: no.*
-
-### E. OpenAPI y cliente generado
-
-- **E1.** «Generar los clientes» (plural): ¿hay otro consumidor además del frontend (pruebas, otra app)? *Supuesto: solo el frontend.*
-- **E2.** ¿Swagger UI y `/api/docs-json` quedan habilitados en `dell-pc`? *Supuesto: deshabilitados (`SWAGGER_ENABLED=false`).*
-- **E3.** ¿Se agrega la verificación en CI de que el cliente commiteado coincide con el backend? *Supuesto: sí.*
-- **E4.** ¿`npm run full` debe regenerar el cliente automáticamente al iniciar el backend, o es un paso manual? *Supuesto: manual (`npm run api:generate`).*
-
-### F. Entorno local
-
-- **F1.** Al detener `npm run full` (Ctrl+C), ¿se baja también el contenedor de PostgreSQL? *Supuesto: no.*
-- **F2.** ¿Otros desarrolladores trabajarán en macOS/Linux, o solo Windows? *Supuesto: scripts multiplataforma igualmente.*
+Cada pregunta indica el **supuesto actual** con el que avanza el plan si no hay respuesta. Al responder, se mueve a §0 y se elimina de aquí. Las secciones A–F y J quedaron resueltas el 19-11-2026 (D-08 a D-19).
 
 ### G. Servidor `dell-pc`
 
-- **G1.** Distribución Linux, CPU/RAM/disco y ¿Docker + Docker Compose ya instalados?
-- **G2.** ¿Cómo resuelven el nombre `dell-pc` los equipos de los usuarios (DNS del router, mDNS `dell-pc.local`, archivo `hosts`)? ¿Lo usarán también celulares/tablets?
-- **G3.** ¿El puerto 80 está libre en `dell-pc` o hay otra aplicación? *Supuesto: libre.*
-- **G4.** ¿El servidor tiene salida a internet (para `docker pull` y `npm ci` al construir)? *Supuesto: sí; si no, se construyen las imágenes en otra máquina y se transfieren.*
-- **G5.** ¿Cómo se despliega: `git pull` en el servidor (requiere acceso al repo de GitHub) o copia de imágenes? *Supuesto: `git pull` + `--build`.*
-- **G6.** Respaldos: frecuencia, retención y destino fuera del servidor (otro disco, NAS, nube). *Supuesto: diario, 30 días, destino por definir.*
-- **G7.** ¿`dell-pc` queda encendido 24/7? ¿Hay UPS? (afecta tareas programadas de alertas y respaldos).
-- **G8.** ¿Se necesitan ambientes separados (QA y PROD) en el mismo servidor? *Supuesto: solo uno.*
-- **G9.** ¿Cuándo se pasa a HTTPS (antes de cargar datos reales)? *Supuesto: antes de la fase 12.*
-- **G10.** Límite y tipos de archivos adjuntos; ¿antivirus (ClamAV)? *Supuesto: PDF/JPG/PNG/XLSX/CSV hasta 20 MB; sin antivirus en la primera etapa.*
+- **G1.** Distribución Linux, CPU, RAM y disco (Docker y Compose ya están instalados).
+- **G6.** Destino de los respaldos fuera del servidor (otro disco, NAS, nube). *Supuesto: diario, 30 días; destino por definir.*
 
 ### H. Reglas de negocio pendientes con el cliente (bloquean fases)
 
@@ -475,24 +429,8 @@ Preguntas ya planteadas en la propuesta que siguen abiertas; se listan para traz
 - **H10.** (Q13 — fase 7) Flujo de EEPP con el cliente final: cobros parciales, retenciones, anticipos.
 - **H11.** (Q20 — fase 9) Cálculo de utilidad: base neta/bruta, devengado/percibido, inclusión de gastos administrativos e indirectos.
 - **H12.** (Q21 — fase 10) Quién autoriza el cierre de obra y condiciones de reapertura.
-- **H13.** (Q18 — fase 2) ¿Quién puede modificar datos bancarios de proveedores? ¿Requiere aprobación de un segundo usuario?
-- **H14.** (Q24) Con acceso solo por la red local (`dell-pc`), ¿los jefes de obra necesitan usarla desde terreno (celular fuera de la oficina)? Eso requeriría VPN o exposición a internet.
 - **H15.** (Q26) Duración de la marcha paralela con Laudus y quién autoriza su desconexión.
-- **H16.** Catálogos: estados de obra, familias de partidas, categorías de gasto, tipos de documento. ¿Existen hoy en Laudus/Excel?
-- **H17.** Numeración de folios de OC, OT, EEPP y lotes (por obra, por año, correlativo global). ¿Se continúa la numeración de Laudus?
 
 ### I. Repositorio y proceso
 
-- **I1.** ¿Se trabaja con ramas y PR hacia `main` en GitHub (`loreto2888/Nomade`) o commits directos? *Supuesto: rama por fase + PR.*
-- **I2.** ¿Se configura GitHub Actions como CI? *Supuesto: sí.*
-- **I3.** Nivel de pruebas esperado. *Supuesto: reglas financieras, autorización y concurrencia obligatorias; E2E para flujos UAT.*
-- **I4.** Convención de commits. *Supuesto: Conventional Commits en inglés, como el historial actual.*
-- **I5.** ¿Se versiona el `.docx` de la propuesta en git? Contiene nombres del cliente. *Supuesto: queda fuera de git (`.gitignore`).*
 - **I6.** ¿El README raíz se reescribe para la nueva aplicación? *Supuesto: sí; el README del prototipo se mueve con él.*
-
-### J. Prototipo (`apps/prototipo`)
-
-- **J1.** ¿Se conservan en la app real los textos «Sobre esta pantalla» y «Continuar en», y se elimina la franja «Prototipo»? *Supuesto: se conserva «Continuar en»; se eliminan la franja y las notas de prototipo.*
-- **J2.** ¿Se mantienen las validaciones del prototipo (contraseña ≥ 12, límites de texto 180/1000) como base? *Supuesto: sí.*
-- **J3.** Indicadores indispensables del dashboard (P02) en la primera versión. *Supuesto: los de la ficha P02 (obras activas, ingresos, costos, comprometido, margen, EEPP pendientes).*
-- **J4.** ¿`apps/prototipo` se elimina cuando haya paridad funcional o queda permanentemente como referencia? *Supuesto: se elimina tras la fase 9.*
