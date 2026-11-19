@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, EntityManager, Repository } from 'typeorm';
 import type { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity.js';
 import { Rol } from '../../common/permisos/rol.js';
+import { escaparLike } from '../../common/paginacion/like.js';
 import { rangoPagina } from '../../common/paginacion/pagina.js';
 import { Usuario } from './usuario.entity.js';
 
@@ -14,10 +15,7 @@ export interface FiltroUsuarios {
   tamanio: number;
 }
 
-/** Escapa `%`, `_` y `\` para usarlos literalmente en un `LIKE`. */
-export function escaparLike(texto: string): string {
-  return texto.replace(/[\\%_]/g, (c) => `\\${c}`);
-}
+export { escaparLike };
 
 /** Acceso a datos de usuarios. Los métodos aceptan el `EntityManager` de una transacción. */
 @Injectable()

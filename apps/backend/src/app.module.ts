@@ -6,10 +6,17 @@ import { validarEntorno, type Entorno } from './config/entorno.js';
 import { crearConfigLogger } from './config/logger.config.js';
 import { DatabaseModule } from './database/database.module.js';
 import { SeguridadModule } from './common/seguridad/seguridad.module.js';
+import { AdjuntosModule } from './modules/adjuntos/adjuntos.module.js';
 import { AuditoriaModule } from './modules/auditoria/auditoria.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
+import { CatalogosModule } from './modules/catalogos/catalogos.module.js';
+import { ClientesModule } from './modules/clientes/clientes.module.js';
+import { ObrasModule } from './modules/obras/obras.module.js';
+import { ParametrosModule } from './modules/parametros/parametros.module.js';
+import { ProveedoresModule } from './modules/proveedores/proveedores.module.js';
 import { SaludModule } from './modules/salud/salud.module.js';
 import { SesionesModule } from './modules/sesiones/sesiones.module.js';
+import { UfModule } from './modules/uf/uf.module.js';
 import { UsuariosModule } from './modules/usuarios/usuarios.module.js';
 
 @Module({
@@ -36,6 +43,13 @@ import { UsuariosModule } from './modules/usuarios/usuarios.module.js';
     SesionesModule,
     UsuariosModule,
     AuthModule,
+    CatalogosModule,
+    ClientesModule,
+    ProveedoresModule,
+    UfModule,
+    ParametrosModule,
+    ObrasModule,
+    AdjuntosModule,
     SaludModule,
   ],
 })

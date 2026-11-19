@@ -43,8 +43,10 @@ describe('mapa de permisos', () => {
         'usuarios.consultar',
         'auditoria.consultar',
         'parametros.administrar',
+        'catalogos.administrar',
         'migracion.administrar',
         'importaciones.administrar',
+        'proveedores.datos_bancarios.consultar',
         'proveedores.datos_bancarios.modificar',
       ]),
     );

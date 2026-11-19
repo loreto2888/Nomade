@@ -14,8 +14,15 @@
 
 
 
+export * from './api/adjuntos-api';
 export * from './api/auditoria-api';
 export * from './api/auth-api';
+export * from './api/catalogos-api';
+export * from './api/clientes-api';
+export * from './api/obras-api';
+export * from './api/parametros-api';
+export * from './api/proveedores-api';
 export * from './api/salud-api';
+export * from './api/uf-api';
 export * from './api/usuarios-api';
 

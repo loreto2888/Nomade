@@ -35,6 +35,7 @@
 | D-18 | 19-11-2026 | **Repositorio y proceso (I1–I5)**: commits directos a `main`, sin ramas ni PR salvo pedido explícito (`AGENTS.md`); CI con GitHub Actions; pruebas de reglas financieras, autorización y concurrencia obligatorias, más E2E de los flujos UAT; **mensajes de commit en español**; el `.docx` de la propuesta **se versiona** en git. |
 | D-19 | 19-11-2026 | **Prototipo (J1–J4)**: se conserva solo «Continuar en» (se eliminan la franja «Prototipo» y las notas «Sobre esta pantalla»); se mantienen sus validaciones (contraseña ≥ 12, textos 180/1000); el dashboard P02 parte con los indicadores de su ficha; `apps/prototipo` se elimina tras la fase 9. |
 | D-20 | 19-11-2026 | **Fase 1 completada — Identidad y acceso** (P01, P25, P26 consulta): migración `identidad` (`usuario`, `sesion`, `auditoria_evento` append-only; `idempotencia` y `token_recuperacion` no se crean, la recuperación es por restablecimiento del admin); módulos `auth`, `usuarios`, `auditoria`, `sesiones`; `SessionGuard` + `AutorizacionGuard` globales, mapa de permisos (`oc.aprobar`, `lote.aprobar`, `eepp.aprobar` ya declarados) y política de autoaprobación D-10 como helper reutilizable; hash argon2id con `node:crypto` (Node ≥ 24.7); contraseñas temporales generadas por el servidor (se muestran una vez); frontend con login, cambio obligatorio de contraseña, rutas protegidas, `RoleGate`, P25 y P26 con DataGrid, tema claro/oscuro con preferencia por usuario y menú con P23/P27/P29 «pendientes». D-16 aplicado a `.env.deploy.example` y `docker-compose.deploy.yml` (`WEB_PORT=5178`, `APP_ORIGIN=https://nomade.coworlabs.cl`, `COOKIE_SECURE=true`). |
+| D-21 | 19-11-2026 | **Fase 2 completada — Maestros y obras** (P03, P04, P05 esqueleto, P22, P27 mínimo, clientes): migración `maestros` (`catalogo`, `cliente`, `proveedor`, `proveedor_cuenta_bancaria`, `obra`, `parametro` + `parametro_valor` versionado con vigencia —incluye IVA—, `valor_uf`, `adjunto`; función `nomade.fn_rut_valido`); módulos `clientes`, `proveedores` (cuentas bancarias **solo admin**, auditadas al consultar y al modificar: permisos `proveedores.datos_bancarios.consultar/modificar`), `obras` (CRUD, filtros, orden y ficha `resumen`), `parametros`, `uf`, `catalogos` (permiso `catalogos.administrar`) y `adjuntos` (subida validada por extensión **y contenido**, ≤ 20 MB, descarga solo con sesión); borrado lógico, `version`→409 y bitácora en todo; RUT módulo 11 compartido (backend, BD y frontend); frontend con `RutField`, `MoneyField`/`formatCLP`/`formatUF`, `StatusChip`, `AttachmentUploader`, `ConflictDialog` (compara y deja elegir), rutas `/obras`, `/obras/nueva`, `/obras/:id`, `/obras/:id/editar`, `/clientes`, `/proveedores` y `/admin/parametros` (P27 deja de ser «pendiente»; P23 y P29 siguen); seeds de desarrollo con las obras del prototipo. **Supuestos**: (1) *Catálogos en una sola tabla genérica* (misma forma, contenido real por entregar —H16—, una sola pantalla de administración y FK compuesta `(id, tipo)` desde la obra); su **contenido base es provisorio** (estados de obra: en preparación, activa, suspendida, terminada, cerrada; tipos de documento DTE; categorías de gasto; familias de partida) y los ítems no se eliminan, se desactivan; los que usa la lógica (`en_preparacion`, `activa`, `cerrada`) no se pueden desactivar ni cambiar de código. (2) Parámetros base provisorios: IVA 19 %, plazo de pago a proveedores 30 días y aviso previo 5 días (Q10); una versión nueva debe empezar hoy o después y las ya vigentes no se editan ni eliminan. (3) Obra: centro de costo único (2–20 caracteres `A-Z 0-9 . _ -`, mayúsculas; regla de numeración pendiente), `responsable` es texto libre, monto del contrato en CLP (enteros) o UF (4 decimales) con el equivalente en CLP como fotografía al valor de la UF del día; no se puede pasar a «cerrada» desde la edición (lo hará el cierre de la fase 10), una obra cerrada es de solo lectura y solo se elimina (lógicamente) una obra «en preparación»; un cliente con obras no se elimina. (4) Valor de la UF cargado a mano por el admin (sin integración automática); si falta el día se usa el último de hasta 7 días antes, y si no, 422 `UF_NO_DISPONIBLE`. (5) Adjuntos solo de obra, proveedor y cliente; eliminar es lógico y conserva el archivo en el volumen; el tipo MIME se fija según la extensión validada. (6) «Clientes» se agrega al menú Obras (no figuraba en §10.3). (7) La ficha de obra implementa «Resumen» (datos, contrato, adjuntos); las demás pestañas muestran «pendiente» con su fase. |
 
 ## 1. Objetivo y alcance
 
@@ -196,7 +197,7 @@ En desarrollo, Vite hace **proxy** de `/api` → `http://localhost:3007`, de mod
 |---|---|
 | base | esquema, extensiones (`pgcrypto`, `citext`), grants, `auditoria_evento`, `idempotencia` |
 | identidad | `usuario` (rol `admin`/`usuario`), `sesion`, `token_recuperacion` |
-| maestros | `cliente`, `proveedor`, `proveedor_cuenta_bancaria`, `obra` (centro de costo único), `parametro` (versionado con vigencia), catálogos |
+| maestros | `cliente`, `proveedor`, `proveedor_cuenta_bancaria`, `obra` (centro de costo único), `parametro` + `parametro_valor` (versionado con vigencia), `catalogo`, `valor_uf`, `adjunto` |
 | presupuesto | `presupuesto_version`, `partida` |
 | compras | `cotizacion`, `orden_trabajo`, `ot_hito` (porcentajes), `orden_compra`, `oc_linea`, `recepcion` |
 | documentos de compra | `documento_compra` (único por `rut_emisor + tipo + folio`), `documento_compra_oc`, `documento_compra_imputacion` |
@@ -205,7 +206,7 @@ En desarrollo, Vite hace **proxy** de `/api` → `http://localhost:3007`, de mod
 | costos | `quincena`, `quincena_distribucion`, `rendicion`, `gasto_administrativo`, `prorrateo` |
 | control | `movimiento` (libro, append-only con reversas), `excepcion_conciliacion`, `alerta`, `tarea`, `actividad` |
 | cierres | `cierre_obra`, `cierre_anual` |
-| soporte | `adjunto`, `importacion_lote`, `importacion_fila`, esquema `legado` para staging de migración Laudus |
+| soporte | `importacion_lote`, `importacion_fila`, esquema `legado` para staging de migración Laudus |
 
 El detalle de columnas se cierra en cada fase (§11), no todo al inicio.
 
@@ -399,9 +400,9 @@ El despliegue en `dell-pc` puede hacerse desde la fase 1 para que el cliente pru
 
 ## 15. Próximos pasos
 
-1. Fase 1 completada (D-20).
-2. Iniciar la fase 1 (identidad y acceso), ya desbloqueada por D-10 y D-11.
-3. Pedir al cliente los catálogos (H16) y enviarle las preguntas de §16 H que bloquean las fases 3–11.
+1. Fases 1 (D-20) y 2 (D-21) completadas.
+2. La fase 3 (presupuesto) sigue bloqueada por Q12 y la plantilla Excel real (§16 H9): pedirlas para iniciarla.
+3. Pedir al cliente los catálogos reales (H16) para reemplazar el catálogo base provisorio de D-21, y enviarle las preguntas de §16 H que bloquean las fases 3–11.
 
 ---
 

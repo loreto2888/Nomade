@@ -19,6 +19,7 @@ import SettingsOutlined from '@mui/icons-material/SettingsOutlined';
 import SouthWestOutlined from '@mui/icons-material/SouthWestOutlined';
 import SwapHorizOutlined from '@mui/icons-material/SwapHorizOutlined';
 import SyncAltOutlined from '@mui/icons-material/SyncAltOutlined';
+import BusinessOutlined from '@mui/icons-material/BusinessOutlined';
 import AutoAwesomeOutlined from '@mui/icons-material/AutoAwesomeOutlined';
 import UploadFileOutlined from '@mui/icons-material/UploadFileOutlined';
 import type { SvgIconComponent } from '@mui/icons-material';
@@ -74,6 +75,13 @@ export const MENU: SeccionMenu[] = [
         titulo: 'Obras y centros de costo',
         descripcion: 'Consulta y administra tus obras y centros de costo en un solo lugar.',
         icono: ApartmentOutlined,
+      },
+      {
+        ruta: '/clientes',
+        etiqueta: 'Clientes',
+        titulo: 'Clientes',
+        descripcion: 'Administra los clientes (mandantes) a los que pertenecen las obras.',
+        icono: BusinessOutlined,
       },
     ],
   },
@@ -237,9 +245,8 @@ export const MENU: SeccionMenu[] = [
         ruta: '/admin/parametros',
         etiqueta: 'Parámetros',
         titulo: 'Parámetros financieros',
-        descripcion: 'Configura criterios financieros, límites y autorizaciones.',
+        descripcion: 'Configura el IVA, los plazos, el valor de la UF y los catálogos del sistema.',
         icono: SettingsOutlined,
-        pendiente: true,
       },
       {
         ruta: '/admin/migracion',
@@ -260,6 +267,13 @@ export const PANTALLAS_INTERNAS: (Pantalla & { seccion: string; soloAdmin?: bool
     etiqueta: 'Nueva obra',
     titulo: 'Alta y edición de obra',
     descripcion: 'Define los datos principales, responsables y fechas de una obra.',
+    seccion: 'Obras',
+  },
+  {
+    ruta: '/obras/:id/editar',
+    etiqueta: 'Editar obra',
+    titulo: 'Edición de obra',
+    descripcion: 'Modifica los datos principales, responsables, fechas y contrato de una obra.',
     seccion: 'Obras',
   },
   {

@@ -2,7 +2,7 @@ import { Rol } from './rol.js';
 
 /**
  * Permisos de administración (D-03): solo el rol `admin`.
- * Usuarios (P25), auditoría (P26), parámetros (P27), migración/integraciones
+ * Usuarios (P25), auditoría (P26), parámetros y catálogos (P27), migración/integraciones
  * (P23), importación masiva (P24) y datos bancarios de proveedores (D-17).
  */
 export const PERMISOS_ADMINISTRACION = [
@@ -13,8 +13,10 @@ export const PERMISOS_ADMINISTRACION = [
   'usuarios.restablecer_clave',
   'auditoria.consultar',
   'parametros.administrar',
+  'catalogos.administrar',
   'migracion.administrar',
   'importaciones.administrar',
+  'proveedores.datos_bancarios.consultar',
   'proveedores.datos_bancarios.modificar',
 ] as const;
 

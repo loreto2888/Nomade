@@ -1,5 +1,11 @@
 # seeds-dev — datos ficticios SOLO para desarrollo
 
+Seeds actuales:
+
+- `1795070000100_maestros-ficticios.sql` — fase 2: 3 clientes, 3 proveedores (uno con una cuenta bancaria
+  falsa), valores de la UF alrededor del 19-11-2026 y las 4 obras del prototipo (una de ellas en UF).
+  Es idempotente: no duplica si los registros ya existen.
+
 Esta carpeta contiene datos **ficticios** para trabajar en local (por ejemplo, las obras de
 ejemplo del prototipo: Local Parque Norte, Oficinas Nueva Vista, Tienda Los Robles,
 Habilitación Providencia).

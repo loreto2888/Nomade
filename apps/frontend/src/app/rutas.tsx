@@ -7,6 +7,12 @@ import { InicioPage } from '@/features/inicio/InicioPage';
 import { CambiarClavePage } from '@/features/acceso/CambiarClavePage';
 import { LoginPage } from '@/features/acceso/LoginPage';
 import { AuditoriaPage } from '@/features/auditoria/AuditoriaPage';
+import { ClientesPage } from '@/features/clientes/ClientesPage';
+import { FichaObraPage } from '@/features/obras/FichaObraPage';
+import { ObraFormPage } from '@/features/obras/ObraFormPage';
+import { ObrasPage } from '@/features/obras/ObrasPage';
+import { ParametrosPage } from '@/features/parametros/ParametrosPage';
+import { ProveedoresPage } from '@/features/proveedores/ProveedoresPage';
 import { UsuariosPage } from '@/features/usuarios/UsuariosPage';
 import { AppLayout, type HandleRuta } from './layout/AppLayout';
 import { MENU, PANTALLAS_INTERNAS, type Pantalla } from './navegacion';
@@ -16,6 +22,13 @@ import { SoloAdmin } from './SoloAdmin';
 
 /** Pantallas ya implementadas: reemplazan al placeholder «En construcción». */
 const PAGINAS_IMPLEMENTADAS: Record<string, ReactElement> = {
+  '/obras': <ObrasPage />,
+  '/obras/nueva': <ObraFormPage />,
+  '/obras/:id/editar': <ObraFormPage />,
+  '/obras/:id': <FichaObraPage />,
+  '/clientes': <ClientesPage />,
+  '/proveedores': <ProveedoresPage />,
+  '/admin/parametros': <ParametrosPage />,
   '/admin/usuarios': <UsuariosPage />,
   '/admin/auditoria': <AuditoriaPage />,
 };

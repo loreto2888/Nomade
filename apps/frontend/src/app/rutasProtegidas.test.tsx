@@ -35,11 +35,14 @@ describe('rutas protegidas y menú por rol', () => {
     await waitFor(() => expect(router.state.location.pathname).toBe('/'));
   });
 
-  it('P23, P27 y P29 aparecen en el menú como «pendientes» (D-09)', () => {
+  it('P23 y P29 aparecen en el menú como «pendientes» (D-09); P27 ya está implementada', () => {
     simularApi({});
     renderApp('/', { sesion: sesionAdmin });
     const nav = screen.getByRole('navigation', { name: 'Navegación principal' });
-    for (const nombre of ['Parámetros', 'Migración e integraciones', 'Asistencia con IA']) {
+    expect(within(nav).getByRole('link', { name: 'Parámetros' })).not.toHaveTextContent(
+      'Pendiente',
+    );
+    for (const nombre of ['Migración e integraciones', 'Asistencia con IA']) {
       const enlace = within(nav).getByRole('link', { name: new RegExp(nombre) });
       expect(within(enlace).getByText('Pendiente')).toBeInTheDocument();
     }
