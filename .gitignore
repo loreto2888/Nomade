@@ -1,3 +1,22 @@
+# Dependencias y artefactos
 node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+*.log
+
+# Datos locales (SQLite del prototipo, respaldos del servidor)
 data/
+backups/
+
+# Variables de entorno reales: NUNCA se versionan.
+# Los ejemplos sí (excepciones explícitas).
 .env
+.env.*
+!.env.example
+!.env.*.example
+!.env.deploy.example
+
+# SO
+.DS_Store
+Thumbs.db

@@ -1,0 +1,11 @@
+{
+  "migrations-dir": "seeds-dev",
+  "ignore-pattern": "([.].*|.*[.]md)",
+  "schema": "nomade",
+  "migrations-schema": "nomade",
+  "migrations-table": "pgseeds",
+  "migration-file-language": "sql",
+  "migration-filename-format": "timestamp",
+  "check-order": true,
+  "advisory-lock-mode": "fail"
+}

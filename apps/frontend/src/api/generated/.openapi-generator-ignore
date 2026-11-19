@@ -1,0 +1,5 @@
+# Archivos que openapi-generator NO debe crear ni sobrescribir en esta carpeta.
+README.md
+git_push.sh
+.gitignore
+.npmignore

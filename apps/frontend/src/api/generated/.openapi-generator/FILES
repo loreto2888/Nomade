@@ -1,0 +1,14 @@
+api.ts
+api/salud-api.ts
+base.ts
+common.ts
+configuration.ts
+docs/ErrorResponse.md
+docs/EstadoSalud.md
+docs/SaludApi.md
+docs/SaludDto.md
+index.ts
+models/error-response.ts
+models/estado-salud.ts
+models/index.ts
+models/salud-dto.ts

@@ -1,0 +1,52 @@
+# =============================================================================
+# .dockerignore ÚNICO del repo. Todas las imágenes (migrations, backend, web)
+# se construyen con el contexto en la RAÍZ:
+#   docker build -f apps/<app>/Dockerfile .
+# Cada Dockerfile copia SOLO lo que necesita (COPY explícitos). Este archivo
+# solo achica el contexto y es una segunda barrera para secretos.
+# No excluir aquí nada que necesite un Dockerfile: package.json raíz y de cada
+# workspace, package-lock.json, .npmrc, apps/<app>/src, configs (tsconfig*,
+# vite/nest/eslint), nginx.conf, public/, index.html, src/api/generated/.
+# =============================================================================
+
+# Control de versiones y editores
+.git
+.gitignore
+**/.gitattributes
+.editorconfig
+.vscode
+.idea
+**/.DS_Store
+**/Thumbs.db
+
+# Dependencias y artefactos: se instalan/compilan dentro de la imagen
+**/node_modules
+**/dist
+**/coverage
+**/*.tsbuildinfo
+**/playwright-report
+**/test-results
+
+# Secretos y entornos: NUNCA entran al contexto (ni siquiera los ejemplos)
+**/.env
+**/.env.*
+
+# Logs
+**/*.log
+**/npm-debug.log*
+
+# Datos locales y respaldos
+/data
+/backups
+
+# Fuera de las imágenes
+apps/prototipo
+docs
+deploy
+puertos.md
+README.md
+docker-compose*.yml
+.dockerignore
+
+# Solo desarrollo: datos ficticios de migrations (nunca en una imagen)
+apps/migrations/seeds-dev
