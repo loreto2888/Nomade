@@ -1,10 +1,10 @@
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import { useTheme } from '@mui/material/styles';
+import { useTheme, type SxProps, type Theme } from '@mui/material/styles';
 import { useState } from 'react';
 import { Outlet, useMatches } from 'react-router';
-import { ANCHO_BARRA_LATERAL, tokens } from '@/app/theme';
+import { ANCHO_BARRA_LATERAL } from '@/app/theme';
 import { BarraSuperior } from './BarraSuperior';
 import { MenuLateral } from './MenuLateral';
 
@@ -22,14 +22,15 @@ function useEtiquetaRutaActual(): string {
   return 'Inicio';
 }
 
-const estiloPapel = {
+const estiloPapel: SxProps<Theme> = (tema) => ({
   width: ANCHO_BARRA_LATERAL,
   maxWidth: '85vw',
   boxSizing: 'border-box',
-  bgcolor: tokens.barraLateral.fondo,
+  bgcolor: tema.palette.barraLateral.fondo,
   color: '#dbe9df',
   border: 0,
-} as const;
+  backgroundImage: 'none',
+});
 
 export function AppLayout() {
   const theme = useTheme();

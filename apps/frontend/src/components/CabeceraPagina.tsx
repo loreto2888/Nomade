@@ -32,7 +32,7 @@ export function CabeceraPagina({ eyebrow, titulo, descripcion, acciones }: Cabec
           {titulo}
         </Typography>
         {descripcion && (
-          <Typography sx={{ fontSize: 13, color: '#8b9b90', mt: 1.125, lineHeight: 1.5 }}>
+          <Typography sx={{ fontSize: 13, color: 'apoyo.textoSuave', mt: 1.125, lineHeight: 1.5 }}>
             {descripcion}
           </Typography>
         )}

@@ -5,7 +5,12 @@ import { OrigenMiddleware } from './common/seguridad/origen.middleware.js';
 import { validarEntorno, type Entorno } from './config/entorno.js';
 import { crearConfigLogger } from './config/logger.config.js';
 import { DatabaseModule } from './database/database.module.js';
+import { SeguridadModule } from './common/seguridad/seguridad.module.js';
+import { AuditoriaModule } from './modules/auditoria/auditoria.module.js';
+import { AuthModule } from './modules/auth/auth.module.js';
 import { SaludModule } from './modules/salud/salud.module.js';
+import { SesionesModule } from './modules/sesiones/sesiones.module.js';
+import { UsuariosModule } from './modules/usuarios/usuarios.module.js';
 
 @Module({
   imports: [
@@ -26,6 +31,11 @@ import { SaludModule } from './modules/salud/salud.module.js';
         }),
     }),
     DatabaseModule,
+    SeguridadModule,
+    AuditoriaModule,
+    SesionesModule,
+    UsuariosModule,
+    AuthModule,
     SaludModule,
   ],
 })

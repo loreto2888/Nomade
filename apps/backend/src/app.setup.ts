@@ -7,9 +7,9 @@ import { FiltroExcepciones } from './common/errores/filtro-excepciones.js';
 import { crearValidationPipe } from './common/errores/validacion.js';
 import type { Entorno } from './config/entorno.js';
 import { VERSION_APP } from './config/version.js';
+import { COOKIE_SESION, PREFIJO_API } from './app.constantes.js';
 
-export const PREFIJO_API = 'api';
-export const COOKIE_SESION = 'nomade_session';
+export { COOKIE_SESION, PREFIJO_API };
 
 /**
  * Configuración HTTP común a `main.ts` y a las pruebas e2e.

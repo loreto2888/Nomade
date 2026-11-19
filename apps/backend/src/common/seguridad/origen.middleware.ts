@@ -7,8 +7,10 @@ import { ErrorAplicacion } from '../errores/error-aplicacion.js';
 const METODOS_SEGUROS = new Set(['GET', 'HEAD', 'OPTIONS']);
 
 /**
- * Protección CSRF básica: los métodos que modifican estado solo se aceptan si
- * el header `Origin` (cuando viene) coincide con `APP_ORIGIN`.
+ * Protección CSRF básica (complementa la cookie `SameSite=Strict`): los
+ * métodos que modifican estado solo se aceptan si el header `Origin` (cuando
+ * viene) coincide con `APP_ORIGIN`. Sin `Origin`, se rechaza si el navegador
+ * declara la solicitud como `cross-site` mediante `Sec-Fetch-Site`.
  */
 @Injectable()
 export class OrigenMiddleware implements NestMiddleware {
@@ -20,11 +22,11 @@ export class OrigenMiddleware implements NestMiddleware {
 
   use(req: Request, _res: Response, next: NextFunction): void {
     const origen = req.headers.origin;
-    if (
-      !METODOS_SEGUROS.has(req.method) &&
-      origen !== undefined &&
-      origen !== this.origenPermitido
-    ) {
+    const origenAjeno =
+      origen !== undefined
+        ? origen !== this.origenPermitido
+        : req.headers['sec-fetch-site'] === 'cross-site';
+    if (!METODOS_SEGUROS.has(req.method) && origenAjeno) {
       throw new ErrorAplicacion(
         HttpStatus.FORBIDDEN,
         'ORIGEN_NO_PERMITIDO',

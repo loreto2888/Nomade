@@ -21,7 +21,7 @@
 | D-04 | 18-11-2026 | UI con **MUI** (Material UI + MUI X Community: DataGrid, Date Pickers, Charts). Sin Material React Table. |
 | D-05 | 18-11-2026 | Migraciones con **node-pg-migrate** en `apps/migrations` (workspace npm, Node). |
 | D-06 | 18-11-2026 | Prototipo actual se mueve a **`apps/prototipo`** (referencia ejecutable, fuera de los workspaces). |
-| D-07 | 18-11-2026 | Despliegue en **servidor Linux local**, accesible solo en la red local como **`http://dell-pc`** (HTTP, puerto 80). HTTPS queda como mejora posterior. **Reemplazada por D-16** (Cloudflare Tunnel, HTTPS, puerto 5177). |
+| D-07 | 18-11-2026 | Despliegue en **servidor Linux local**, accesible solo en la red local como **`http://dell-pc`** (HTTP, puerto 80). HTTPS queda como mejora posterior. **Reemplazada por D-16** (Cloudflare Tunnel, HTTPS, puerto 5178). |
 | D-08 | 18-11-2026 | **Fase 0 completada**: monorepo conectado, `npm run full`, cliente OpenAPI generado y versionado, imágenes con contexto raíz y compose de despliegue verificado. Quedan confirmados por la implementación: TypeORM (C1), migraciones SQL (C3), versiones de §2 fijadas en el lockfile (C4) y generador `typescript-axios` (C5). |
 | D-09 | 19-11-2026 | **Alcance (A1–A7)**: sistema productivo por fases (las fases 0–3 sirven de demostración); se respeta el orden de §11; navegación según Anexo D; cada documento tiene su propio estado `borrador` (sin entidad genérica de borradores); las pantallas sin reglas (P23, P27, P29) se **muestran como «pendientes»**; una sola empresa (Constructora Nómade); sin fecha objetivo para la primera versión en el servidor. |
 | D-10 | 19-11-2026 | **Autoaprobación (B1)**: el `usuario` **no** puede aprobar lo que él mismo creó (OC, lote de pago, EEPP); el `admin` **sí** puede. |
@@ -30,10 +30,11 @@
 | D-13 | 19-11-2026 | **Base de datos (D1–D4)**: PK **`bigint generated always as identity`**; montos en **CLP y UF** (UF con su valor diario para convertir a CLP); borrado lógico en maestros y nunca en documentos financieros (anulación/reversa); no se migran datos del SQLite del prototipo. |
 | D-14 | 19-11-2026 | **OpenAPI (E1–E4)**: el único consumidor del cliente generado es el frontend; Swagger deshabilitado en el servidor (`SWAGGER_ENABLED=false`); **no** se verifica en CI que el cliente commiteado coincida con el backend; la regeneración es manual (`npm run api:generate`). |
 | D-15 | 19-11-2026 | **Entorno local (F1–F2)**: `npm run full` no baja PostgreSQL al detenerse; el desarrollo es **solo en Windows** (no se exige compatibilidad con macOS/Linux en los scripts de desarrollo). |
-| D-16 | 19-11-2026 | **Servidor (G1–G10)** — reemplaza parcialmente D-07: `dell-pc` ya tiene Docker y Docker Compose; el acceso es **solo mediante Cloudflare Tunnel** (ya configurado), sin acceso directo desde equipos de la red; el servicio web se publica en el puerto **5177** (no 80); el servidor tiene salida a internet y se despliega con `git pull` + `--build`; respaldos diarios con retención de 30 días (destino externo por definir); encendido 24/7 **sin UPS**; un solo ambiente; **HTTPS desde el inicio** (terminado por Cloudflare); adjuntos PDF/JPG/PNG/XLSX/CSV hasta 20 MB, sin antivirus en la primera etapa. |
+| D-16 | 19-11-2026 | **Servidor (G1–G10)** — reemplaza parcialmente D-07: `dell-pc` ya tiene Docker y Docker Compose; el acceso es **solo mediante Cloudflare Tunnel** (ya configurado), sin acceso directo desde equipos de la red; el servicio web se publica en el puerto **5178** (no 80; el 5177 queda para Vite en desarrollo, que corre en la misma máquina); el servidor tiene salida a internet y se despliega con `git pull` + `--build`; respaldos diarios con retención de 30 días (destino externo por definir); encendido 24/7 **sin UPS**; un solo ambiente; **HTTPS desde el inicio** (terminado por Cloudflare); adjuntos PDF/JPG/PNG/XLSX/CSV hasta 20 MB, sin antivirus en la primera etapa. |
 | D-17 | 19-11-2026 | **Reglas de negocio (H13, H14, H16, H17)**: solo el admin modifica datos bancarios de proveedores (auditado); los jefes de obra usan la plataforma desde terreno vía el túnel, por lo que la UI debe ser **responsive para celular**; los catálogos existen en Laudus/Excel y se pedirán al cliente; folios con **correlativo global por tipo de documento**. |
 | D-18 | 19-11-2026 | **Repositorio y proceso (I1–I5)**: commits directos a `main`, sin ramas ni PR salvo pedido explícito (`AGENTS.md`); CI con GitHub Actions; pruebas de reglas financieras, autorización y concurrencia obligatorias, más E2E de los flujos UAT; **mensajes de commit en español**; el `.docx` de la propuesta **se versiona** en git. |
 | D-19 | 19-11-2026 | **Prototipo (J1–J4)**: se conserva solo «Continuar en» (se eliminan la franja «Prototipo» y las notas «Sobre esta pantalla»); se mantienen sus validaciones (contraseña ≥ 12, textos 180/1000); el dashboard P02 parte con los indicadores de su ficha; `apps/prototipo` se elimina tras la fase 9. |
+| D-20 | 19-11-2026 | **Fase 1 completada — Identidad y acceso** (P01, P25, P26 consulta): migración `identidad` (`usuario`, `sesion`, `auditoria_evento` append-only; `idempotencia` y `token_recuperacion` no se crean, la recuperación es por restablecimiento del admin); módulos `auth`, `usuarios`, `auditoria`, `sesiones`; `SessionGuard` + `AutorizacionGuard` globales, mapa de permisos (`oc.aprobar`, `lote.aprobar`, `eepp.aprobar` ya declarados) y política de autoaprobación D-10 como helper reutilizable; hash argon2id con `node:crypto` (Node ≥ 24.7); contraseñas temporales generadas por el servidor (se muestran una vez); frontend con login, cambio obligatorio de contraseña, rutas protegidas, `RoleGate`, P25 y P26 con DataGrid, tema claro/oscuro con preferencia por usuario y menú con P23/P27/P29 «pendientes». D-16 aplicado a `.env.deploy.example` y `docker-compose.deploy.yml` (`WEB_PORT=5178`, `APP_ORIGIN=https://nomade.coworlabs.cl`, `COOKIE_SECURE=true`). |
 
 ## 1. Objetivo y alcance
 
@@ -127,7 +128,7 @@ Fuera de alcance de la primera versión (salvo que §16 diga lo contrario): emis
 | Backend NestJS | **3007** | 3007 solo en la red interna de Docker (no se publica) |
 | Frontend Vite (dev server) | **5177** | — (se sirve compilado por nginx) |
 | PostgreSQL | **5437** → 5432 | 5432 solo red interna; opcional `127.0.0.1:5437` para mantención |
-| Web (nginx: estáticos + proxy `/api`) | — | **5177** → publicado mediante Cloudflare Tunnel (HTTPS) (D-16) |
+| Web (nginx: estáticos + proxy `/api`) | — | **5178** → publicado mediante Cloudflare Tunnel (HTTPS) (D-16) |
 | Prototipo (`apps/prototipo`) | 3000 (por defecto del prototipo) | — |
 
 Todos los puertos se parametrizan por variables (`BACKEND_PORT`, `FRONTEND_PORT`, `POSTGRES_PORT`, `WEB_PORT`) con esos valores por defecto. Nota: `puertos.md` registra 5437 en `Coworlabs/integracion-wom`; no levantar ambos a la vez (D-01).
@@ -240,12 +241,12 @@ El detalle de columnas se cierra en cada fase (§11), no todo al inicio.
 | `postgres` | `postgres:18` | Volumen persistente, no publicado (o solo `127.0.0.1:5437`). Mismo `init-roles.sh`. |
 | `migrations` | build `apps/migrations` | One-shot: `migrate up` y termina. `depends_on: postgres (service_healthy)`. |
 | `backend` | build `apps/backend` | `depends_on: migrations (service_completed_successfully)`; healthcheck `/api/health`; volumen de adjuntos; usuario no root. |
-| `web` | build `apps/frontend` (multi-stage → nginx) | Sirve el build de Vite y hace proxy `/api` → `backend:3007`. Publica `${WEB_PORT}:80` con `WEB_PORT=5177` (D-16). Único servicio publicado; Cloudflare Tunnel apunta a él. |
+| `web` | build `apps/frontend` (multi-stage → nginx) | Sirve el build de Vite y hace proxy `/api` → `backend:3007`. Publica `${WEB_PORT}:80` con `WEB_PORT=5178` (D-16). Único servicio publicado; Cloudflare Tunnel apunta a él. |
 | `backup` | `postgres:18` + cron | `pg_dump` diario + copia de adjuntos, retención 30 días; destino externo por definir (§16 G). |
 
 - Acceso: solo por **Cloudflare Tunnel** con HTTPS (D-16). `APP_ORIGIN` = URL pública del túnel (`https://…`), cookies con `Secure` (`COOKIE_SECURE=true`). El backend valida `Origin` contra `APP_ORIGIN`.
 - Despliegue previsto: en `dell-pc`, `git pull` → `docker compose -f docker-compose.deploy.yml --env-file .env up -d --build`. Secretos solo en `.env` del servidor (nunca en git); se entrega `.env.deploy.example`.
-- Si se quiere probar el compose de despliegue en la misma máquina donde corre Vite, se usa un `WEB_PORT` distinto de 5177.
+- El despliegue usa 5178 para no chocar con Vite (5177) en la misma máquina.
 - El servidor no tiene UPS (D-16): los respaldos y alertas deben tolerar reinicios (tareas idempotentes y recuperables al arrancar).
 
 ## 9. Backend (NestJS)
@@ -398,7 +399,7 @@ El despliegue en `dell-pc` puede hacerse desde la fase 1 para que el cliente pru
 
 ## 15. Próximos pasos
 
-1. Ajustar lo ya construido a las decisiones D-13 y D-16: PK `bigint` en las migraciones nuevas, `WEB_PORT=5177`, `APP_ORIGIN` con la URL del túnel y `COOKIE_SECURE=true` en `.env.deploy.example`.
+1. Fase 1 completada (D-20).
 2. Iniciar la fase 1 (identidad y acceso), ya desbloqueada por D-10 y D-11.
 3. Pedir al cliente los catálogos (H16) y enviarle las preguntas de §16 H que bloquean las fases 3–11.
 

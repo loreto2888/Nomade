@@ -1,9 +1,9 @@
 import Box from '@mui/material/Box';
-import { tokens } from '@/app/theme';
+import { useTheme } from '@mui/material/styles';
 
 /** Marca «N» + «NÓMADE / GESTIÓN DE OBRAS» del prototipo. */
 export function MarcaNomade() {
-  const { barraLateral: c } = tokens;
+  const c = useTheme().palette.barraLateral;
   return (
     <Box
       sx={{

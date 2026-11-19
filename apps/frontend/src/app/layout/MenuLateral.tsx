@@ -1,4 +1,6 @@
 import Box from '@mui/material/Box';
+import Chip from '@mui/material/Chip';
+import { useTheme } from '@mui/material/styles';
 import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
@@ -7,7 +9,6 @@ import ListSubheader from '@mui/material/ListSubheader';
 import { Link as RouterLink, useLocation } from 'react-router';
 import { MENU, rutaActiva } from '@/app/navegacion';
 import { esAdmin, useSesion } from '@/app/sesion';
-import { tokens } from '@/app/theme';
 import { MarcaNomade } from './MarcaNomade';
 
 interface MenuLateralProps {
@@ -18,7 +19,7 @@ interface MenuLateralProps {
 export function MenuLateral({ onNavegar }: MenuLateralProps) {
   const { pathname } = useLocation();
   const sesion = useSesion();
-  const c = tokens.barraLateral;
+  const c = useTheme().palette.barraLateral;
   const secciones = MENU.filter((seccion) => !seccion.soloAdmin || esAdmin(sesion));
 
   return (
@@ -99,6 +100,22 @@ export function MenuLateral({ onNavegar }: MenuLateralProps) {
                       sx={{ m: 0 }}
                       slotProps={{ primary: { sx: { fontSize: 12, lineHeight: 1.2 } } }}
                     />
+                    {item.pendiente && (
+                      <Chip
+                        label="Pendiente"
+                        size="small"
+                        sx={{
+                          height: 16,
+                          fontSize: 8.5,
+                          letterSpacing: '0.04em',
+                          bgcolor: 'transparent',
+                          color: 'inherit',
+                          border: `1px solid ${c.borde}`,
+                          opacity: 0.85,
+                          '& .MuiChip-label': { px: 0.75 },
+                        }}
+                      />
+                    )}
                   </ListItemButton>
                 );
               })}

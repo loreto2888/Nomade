@@ -6,10 +6,12 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import type { Response } from 'express';
+import { Publico } from '../../common/permisos/decoradores.js';
 import { EstadoSalud, SaludDto } from './salud.dto.js';
 import { SaludService } from './salud.service.js';
 
 @ApiTags('salud')
+@Publico()
 @Controller('health')
 export class SaludController {
   constructor(private readonly saludService: SaludService) {}

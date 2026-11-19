@@ -14,5 +14,8 @@
 
 
 
+export * from './api/auditoria-api';
+export * from './api/auth-api';
 export * from './api/salud-api';
+export * from './api/usuarios-api';
 

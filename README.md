@@ -37,7 +37,7 @@ Un solo `package-lock.json` en la raíz para los tres workspaces.
    |---|---|---|
    | `.env.example` | `.env` | contraseñas de PostgreSQL local (`postgres`, `nomade_owner`, `nomade_app`) |
    | `apps/migrations/.env.example` | `apps/migrations/.env` | `DATABASE_URL` con `nomade_owner` |
-   | `apps/backend/.env.example` | `apps/backend/.env` | `DATABASE_URL` con `nomade_app`, `APP_ORIGIN`, Swagger, `ADJUNTOS_DIR` (opcional) |
+   | `apps/backend/.env.example` | `apps/backend/.env` | `DATABASE_URL` con `nomade_app`, `APP_ORIGIN`, Swagger, `ADJUNTOS_DIR` (opcional), `ADMIN_EMAIL`/`ADMIN_PASSWORD` del primer administrador |
    | `apps/frontend/.env.example` | `apps/frontend/.env` | opcional (destino del proxy `/api`) |
 
 2. Instalar dependencias y arrancar todo:
@@ -113,6 +113,6 @@ cp .env.deploy.example .env && chmod 600 .env      # cambiar TODAS las contrase�
 docker compose -f docker-compose.deploy.yml --env-file .env up -d --build --wait
 ```
 
-Orden: `postgres` (healthy) → `migrations` (exit 0) → `backend` (healthy) → `web` (nginx, puerto `WEB_PORT`, por defecto 80) + `backup` (dump diario). Swagger queda deshabilitado (`/api/docs-json` → 404). Actualización, logs, respaldo y restauración: [`deploy/README.md`](deploy/README.md).
+Orden: `postgres` (healthy) → `migrations` (exit 0) → `backend` (healthy) → `web` (nginx, puerto `WEB_PORT`, por defecto 5178, publicado por Cloudflare Tunnel) + `backup` (dump diario). Swagger queda deshabilitado (`/api/docs-json` → 404). Actualización, logs, respaldo y restauración: [`deploy/README.md`](deploy/README.md).
 
 Para probar el despliegue en una máquina de desarrollo sin chocar con el entorno local, usa otro nombre de proyecto y otro puerto (p. ej. `-p nomade-deploycheck`, `WEB_PORT=58081`, `BACKUP_DIR` en una carpeta temporal) y termina con `down -v --rmi local`.

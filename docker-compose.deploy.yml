@@ -1,5 +1,5 @@
 # =============================================================================
-# Nómade — Docker Compose de DESPLIEGUE (servidor Linux `dell-pc`, LAN, HTTP)
+# Nómade — Docker Compose de DESPLIEGUE (servidor Linux `dell-pc`, vía Cloudflare Tunnel, HTTPS)
 # =============================================================================
 # Primer despliegue (en dell-pc):
 #   git clone <repo> nomade && cd nomade
@@ -11,7 +11,7 @@
 #   docker compose -f docker-compose.deploy.yml --env-file .env up -d --build
 #
 # Orden de arranque: postgres (healthy) → migrations (exit 0) → backend (healthy) → web.
-# Único puerto publicado: web ${WEB_PORT:-80} → http://dell-pc
+# Único puerto publicado: web ${WEB_PORT:-5178}; Cloudflare Tunnel apunta a él (D-16).
 # Detalles, logs, respaldo y restauración: deploy/README.md
 # =============================================================================
 name: nomade
@@ -71,8 +71,12 @@ services:
       NODE_ENV: production
       PORT: "3007"
       DATABASE_URL: postgres://nomade_app:${NOMADE_APP_PASSWORD}@postgres:5432/nomade
-      APP_ORIGIN: ${APP_ORIGIN:-http://dell-pc}
-      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      APP_ORIGIN: ${APP_ORIGIN:-https://nomade.coworlabs.cl}
+      COOKIE_SECURE: ${COOKIE_SECURE:-true}
+      # Primer administrador: solo se usa si la tabla de usuarios está vacía.
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      ADMIN_NAME: ${ADMIN_NAME:-Administrador}
       SWAGGER_ENABLED: ${SWAGGER_ENABLED:-false}
       LOG_LEVEL: ${LOG_LEVEL:-info}
       # Igual al ENV de la imagen; el directorio pertenece a `node` en la imagen,
@@ -100,7 +104,7 @@ services:
     restart: unless-stopped
     logging: *default-logging
     ports:
-      - "${WEB_PORT:-80}:80"
+      - "${WEB_PORT:-5178}:80"
     depends_on:
       backend:
         condition: service_healthy

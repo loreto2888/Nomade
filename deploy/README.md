@@ -1,16 +1,16 @@
 # Despliegue de Nómade en `dell-pc`
 
-Despliegue completo con `docker-compose.deploy.yml`: `postgres` → `migrations` (one-shot) → `backend` → `web` (nginx, puerto 80) + `backup`.
+Despliegue completo con `docker-compose.deploy.yml`: `postgres` → `migrations` (one-shot) → `backend` → `web` (nginx, puerto `WEB_PORT`, 5178 por defecto) + `backup`.
 
-> ⚠️ **Solo HTTP dentro de la red local.** Credenciales y datos viajan sin cifrar en la LAN. No exponer `dell-pc` a internet ni cargar datos reales sin HTTPS (plan §13, D-07). Al pasar a HTTPS: `COOKIE_SECURE=true` y `APP_ORIGIN=https://…`.
+> ℹ️ **Acceso solo por Cloudflare Tunnel (HTTPS, D-16).** El túnel apunta al puerto `WEB_PORT` (5178). En `.env`: `APP_ORIGIN` = URL https del túnel (`https://nomade.coworlabs.cl`) y `COOKIE_SECURE=true`. El primer administrador se crea al arrancar con `ADMIN_EMAIL`/`ADMIN_PASSWORD` si no hay usuarios (debe cambiar la clave al ingresar).
 
 ## Requisitos del servidor
 
 - Linux con **Docker Engine** y el plugin **Docker Compose v2** (`docker compose version`).
-- Puerto 80 libre (o cambiar `WEB_PORT`).
+- Puerto 5178 libre (o cambiar `WEB_PORT`).
 - Salida a internet para `docker pull` y `npm ci` durante el build.
 - Acceso al repositorio git.
-- Los equipos de la LAN deben resolver el nombre `dell-pc` (DNS del router, mDNS o archivo `hosts`).
+- Cloudflare Tunnel configurado hacia `http://localhost:5178` (o el `WEB_PORT` elegido).
 
 ## Primer despliegue
 

@@ -27,8 +27,8 @@ export function EnConstruccionPage({ seccion, titulo, descripcion }: EnConstrucc
               borderRadius: '10px',
               display: 'grid',
               placeItems: 'center',
-              bgcolor: '#f0f5ec',
-              color: '#73947b',
+              bgcolor: 'apoyo.vacioFondo',
+              color: 'apoyo.vacioIcono',
             }}
           >
             <ConstructionOutlined />

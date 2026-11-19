@@ -19,6 +19,7 @@ import SettingsOutlined from '@mui/icons-material/SettingsOutlined';
 import SouthWestOutlined from '@mui/icons-material/SouthWestOutlined';
 import SwapHorizOutlined from '@mui/icons-material/SwapHorizOutlined';
 import SyncAltOutlined from '@mui/icons-material/SyncAltOutlined';
+import AutoAwesomeOutlined from '@mui/icons-material/AutoAwesomeOutlined';
 import UploadFileOutlined from '@mui/icons-material/UploadFileOutlined';
 import type { SvgIconComponent } from '@mui/icons-material';
 
@@ -29,6 +30,8 @@ export interface Pantalla {
   etiqueta: string;
   titulo: string;
   descripcion: string;
+  /** Pantalla sin reglas definidas todavía: se muestra en el menú como «pendiente» (D-09). */
+  pendiente?: boolean;
 }
 
 export interface ItemMenu extends Pantalla {
@@ -202,6 +205,14 @@ export const MENU: SeccionMenu[] = [
         descripcion: 'Prepara la carga de presupuestos y registros desde archivos.',
         icono: UploadFileOutlined,
       },
+      {
+        ruta: '/herramientas/asistencia-ia',
+        etiqueta: 'Asistencia con IA',
+        titulo: 'Asistencia documental con IA',
+        descripcion: 'Explora la extracción asistida de documentos para preparar borradores.',
+        icono: AutoAwesomeOutlined,
+        pendiente: true,
+      },
     ],
   },
   {
@@ -228,6 +239,7 @@ export const MENU: SeccionMenu[] = [
         titulo: 'Parámetros financieros',
         descripcion: 'Configura criterios financieros, límites y autorizaciones.',
         icono: SettingsOutlined,
+        pendiente: true,
       },
       {
         ruta: '/admin/migracion',
@@ -235,6 +247,7 @@ export const MENU: SeccionMenu[] = [
         titulo: 'Migración e integraciones',
         descripcion: 'Coordina las fuentes de datos y conectores autorizados.',
         icono: SyncAltOutlined,
+        pendiente: true,
       },
     ],
   },

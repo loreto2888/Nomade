@@ -28,4 +28,5 @@ Object.defineProperty(window, 'matchMedia', {
 
 afterEach(() => {
   cleanup();
+  window.localStorage.clear();
 });

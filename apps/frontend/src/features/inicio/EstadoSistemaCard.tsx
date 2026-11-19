@@ -38,7 +38,7 @@ export function EstadoSistemaCard() {
           <Typography id="estado-sistema-titulo" variant="h6" component="h2">
             Estado del sistema
           </Typography>
-          <Typography sx={{ fontSize: 11, color: '#a0ada3', mt: 0.75 }}>
+          <Typography sx={{ fontSize: 11, color: 'apoyo.textoTenue', mt: 0.75 }}>
             Conexión con la API y la base de datos
           </Typography>
         </Box>

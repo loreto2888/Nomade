@@ -16,6 +16,7 @@ describe('validarEntorno', () => {
       SWAGGER_ENABLED: false,
       LOG_LEVEL: 'info',
       ADJUNTOS_DIR: './data/adjuntos',
+      ADMIN_NAME: 'Administrador',
     });
   });
 
@@ -55,5 +56,59 @@ describe('validarEntorno', () => {
         SWAGGER_ENABLED: 'si',
       }),
     ).toThrow(/APP_ORIGIN[\s\S]*SWAGGER_ENABLED debe ser "true" o "false"/);
+  });
+
+  describe('primer administrador', () => {
+    it('acepta ADMIN_EMAIL y ADMIN_PASSWORD juntas', () => {
+      const entorno = validarEntorno({
+        ...valido,
+        ADMIN_EMAIL: 'admin@nomade.cl',
+        ADMIN_PASSWORD: 'una-clave-larga-123',
+        ADMIN_NAME: 'Ana Admin',
+      });
+      expect(entorno.ADMIN_EMAIL).toBe('admin@nomade.cl');
+      expect(entorno.ADMIN_NAME).toBe('Ana Admin');
+    });
+
+    it('permite omitir ambas', () => {
+      const entorno = validarEntorno(valido);
+      expect(entorno.ADMIN_EMAIL).toBeUndefined();
+      expect(entorno.ADMIN_PASSWORD).toBeUndefined();
+    });
+
+    it('trata las variables vacías (docker compose) como no definidas', () => {
+      const entorno = validarEntorno({
+        ...valido,
+        ADMIN_EMAIL: '',
+        ADMIN_PASSWORD: '',
+        ADMIN_NAME: '',
+      });
+      expect(entorno.ADMIN_EMAIL).toBeUndefined();
+      expect(entorno.ADMIN_PASSWORD).toBeUndefined();
+      expect(entorno.ADMIN_NAME).toBe('Administrador');
+    });
+
+    it('exige definir las dos o ninguna', () => {
+      expect(() =>
+        validarEntorno({ ...valido, ADMIN_EMAIL: 'admin@nomade.cl' }),
+      ).toThrow(/ADMIN_EMAIL y ADMIN_PASSWORD deben definirse juntas/);
+    });
+
+    it('rechaza correo inválido y contraseña corta', () => {
+      expect(() =>
+        validarEntorno({
+          ...valido,
+          ADMIN_EMAIL: 'no-es-correo',
+          ADMIN_PASSWORD: 'corta',
+        }),
+      ).toThrow(/ADMIN_EMAIL debe ser un correo válido/);
+      expect(() =>
+        validarEntorno({
+          ...valido,
+          ADMIN_EMAIL: 'admin@nomade.cl',
+          ADMIN_PASSWORD: 'corta',
+        }),
+      ).toThrow(/ADMIN_PASSWORD debe tener al menos 12 caracteres/);
+    });
   });
 });
