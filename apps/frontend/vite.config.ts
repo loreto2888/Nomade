@@ -40,6 +40,8 @@ export default defineConfig(({ mode }) => {
     server: {
       port: PUERTO,
       strictPort: true,
+      host: true,
+      allowedHosts: ['nomade.coworlabs.cl'],
       proxy,
     },
     preview: {
