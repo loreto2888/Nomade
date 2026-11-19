@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { clpAUf, elegirValorUf, restarDias, ufAClp } from './conversion-uf.js';
-import { dividir, multiplicar } from './decimal.js';
+import { dividir, multiplicar, sumar } from './decimal.js';
 
 describe('aritmética decimal exacta', () => {
   it('multiplica sin errores de punto flotante', () => {
@@ -26,6 +26,25 @@ describe('aritmética decimal exacta', () => {
 
   it('rechaza entradas no numéricas', () => {
     expect(() => multiplicar('abc', 1, 0)).toThrow('inválido');
+  });
+});
+
+describe('suma decimal exacta', () => {
+  it('suma sin errores de punto flotante', () => {
+    expect(0.1 + 0.2).not.toBe(0.3);
+    expect(sumar([0.1, 0.2], 4)).toBe(0.3);
+    expect(sumar([1234.5678, 0.0001, 99.9999], 4)).toBe(1334.5678);
+  });
+
+  it('suma enteros y una lista vacía', () => {
+    expect(sumar([185_000_000, 1, 2], 0)).toBe(185_000_003);
+    expect(sumar([], 0)).toBe(0);
+  });
+
+  it('cada valor con más decimales de los pedidos se redondea (half-up) antes de sumar', () => {
+    expect(sumar(['1.5', '1.5'], 0)).toBe(4);
+    expect(sumar(['1.4', '1.4'], 0)).toBe(2);
+    expect(sumar(['0.5'], 0)).toBe(1);
   });
 });
 

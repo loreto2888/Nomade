@@ -26,6 +26,18 @@ describe('política de autoaprobación (D-10)', () => {
     expect(puedeAprobar(usuario, { creadoPor: null }, 'oc.aprobar')).toBe(true);
   });
 
+  it('el permiso presupuesto.aprobar sigue la misma política', () => {
+    expect(puedeAprobar(usuario, { creadoPor: 7 }, 'presupuesto.aprobar')).toBe(
+      false,
+    );
+    expect(puedeAprobar(usuario, { creadoPor: 8 }, 'presupuesto.aprobar')).toBe(
+      true,
+    );
+    expect(puedeAprobar(admin, { creadoPor: 1 }, 'presupuesto.aprobar')).toBe(
+      true,
+    );
+  });
+
   it('no aprueba quien no tiene el permiso', () => {
     expect(puedeAprobar(usuario, { creadoPor: 8 }, 'usuarios.crear')).toBe(
       false,

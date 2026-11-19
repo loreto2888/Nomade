@@ -29,6 +29,7 @@ export const PERMISOS_OPERATIVOS = [
   'oc.aprobar',
   'lote.aprobar',
   'eepp.aprobar',
+  'presupuesto.aprobar',
 ] as const;
 
 export type PermisoAdministracion = (typeof PERMISOS_ADMINISTRACION)[number];

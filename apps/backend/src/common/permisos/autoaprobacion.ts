@@ -23,12 +23,8 @@ export function puedeAprobar(
   return documento.creadoPor === null || documento.creadoPor !== actor.id;
 }
 
-/** Igual que `puedeAprobar`, pero lanza `403` con el motivo exacto. */
-export function exigirPuedeAprobar(
-  actor: ActorAprobacion,
-  documento: { creadoPor: number | null },
-  permiso: Permiso,
-): void {
+/** Lanza `403 PROHIBIDO` si el rol del actor no tiene el permiso. */
+export function exigirPermiso(actor: { rol: Rol }, permiso: Permiso): void {
   if (!tienePermiso(actor.rol, permiso)) {
     throw new ErrorAplicacion(
       HttpStatus.FORBIDDEN,
@@ -36,6 +32,15 @@ export function exigirPuedeAprobar(
       'No tienes permiso para realizar esta acción.',
     );
   }
+}
+
+/** Igual que `puedeAprobar`, pero lanza `403` con el motivo exacto. */
+export function exigirPuedeAprobar(
+  actor: ActorAprobacion,
+  documento: { creadoPor: number | null },
+  permiso: Permiso,
+): void {
+  exigirPermiso(actor, permiso);
   if (!puedeAprobar(actor, documento, permiso)) {
     throw new ErrorAplicacion(
       HttpStatus.FORBIDDEN,

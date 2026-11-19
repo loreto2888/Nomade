@@ -1,8 +1,13 @@
 import type { SesionApi } from '@/api/auth';
 import type { UsuarioDto } from '@/api/generated';
 
-const PERMISOS_OPERATIVOS = ['oc.aprobar', 'lote.aprobar', 'eepp.aprobar'];
-const PERMISOS_ADMIN = ['usuarios.consultar', 'usuarios.crear', 'auditoria.consultar'];
+const PERMISOS_OPERATIVOS = ['oc.aprobar', 'lote.aprobar', 'eepp.aprobar', 'presupuesto.aprobar'];
+const PERMISOS_ADMIN = [
+  'usuarios.consultar',
+  'usuarios.crear',
+  'auditoria.consultar',
+  'importaciones.administrar',
+];
 
 export const sesionAdmin: SesionApi = {
   usuario: {
@@ -241,6 +246,226 @@ export function parametroEjemplo(parcial: Partial<ParametroDto> = {}): Parametro
     },
     proximoValor: null,
     version: 1,
+    ...parcial,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Fase 3: presupuesto e importaciones
+// ---------------------------------------------------------------------------
+
+import type {
+  ComparacionPresupuestoDto,
+  FilaImportacionDto,
+  ImportacionLoteDto,
+  PartidaDto,
+  PresupuestoDetalleDto,
+  PresupuestoVersionDto,
+} from '@/api/generated';
+
+export const FAMILIAS_PARTIDA: CatalogoItemDto[] = [
+  {
+    id: 22,
+    tipo: 'familia_partida',
+    codigo: 'obras_preliminares',
+    nombre: 'Obras preliminares',
+    descripcion: null,
+    orden: 10,
+    activo: true,
+    protegido: false,
+    version: 1,
+  },
+  {
+    id: 23,
+    tipo: 'familia_partida',
+    codigo: 'obra_gruesa',
+    nombre: 'Obra gruesa',
+    descripcion: null,
+    orden: 20,
+    activo: true,
+    protegido: false,
+    version: 1,
+  },
+];
+
+export function versionPresupuestoEjemplo(
+  parcial: Partial<PresupuestoVersionDto> = {},
+): PresupuestoVersionDto {
+  return {
+    id: 12,
+    obraId: 1,
+    numero: 1,
+    estado: 'borrador',
+    vigente: false,
+    descripcion: null,
+    moneda: 'CLP',
+    valorUf: null,
+    fechaValorUf: null,
+    total: 3_000_000,
+    totalClp: 3_000_000,
+    cantidadPartidas: 2,
+    copiadaDeId: null,
+    copiadaDeNumero: null,
+    importacionLoteId: null,
+    creadoPor: { id: 3, nombre: 'Tomás Silva' },
+    creadoEn: '2026-11-10T12:00:00.000Z',
+    actualizadoEn: '2026-11-10T12:00:00.000Z',
+    enviadoEn: null,
+    enviadoPor: null,
+    resueltoEn: null,
+    resueltoPor: null,
+    motivoResolucion: null,
+    version: 4,
+    ...parcial,
+  };
+}
+
+export function partidaEjemplo(parcial: Partial<PartidaDto> = {}): PartidaDto {
+  return {
+    id: 31,
+    versionId: 12,
+    orden: 1,
+    codigo: '1.1',
+    familia: { id: 22, codigo: 'obras_preliminares', nombre: 'Obras preliminares' },
+    descripcion: 'Radier de hormigón',
+    unidad: 'm2',
+    cantidad: 120.5,
+    precioUnitario: 18_500,
+    total: 2_229_250,
+    totalClp: 2_229_250,
+    version: 1,
+    ...parcial,
+  };
+}
+
+export function detallePresupuestoEjemplo(
+  version: Partial<PresupuestoVersionDto> = {},
+  partidas?: PartidaDto[],
+): PresupuestoDetalleDto {
+  const lista = partidas ?? [
+    partidaEjemplo(),
+    partidaEjemplo({
+      id: 32,
+      orden: 2,
+      codigo: '2.1',
+      familia: { id: 23, codigo: 'obra_gruesa', nombre: 'Obra gruesa' },
+      descripcion: 'Muros de albañilería',
+      unidad: 'm2',
+      cantidad: 40,
+      precioUnitario: 19_268.75,
+      total: 770_750,
+      totalClp: 770_750,
+    }),
+  ];
+  const v = versionPresupuestoEjemplo({ cantidadPartidas: lista.length, ...version });
+  return {
+    version: v,
+    partidas: lista,
+    totalesPorFamilia: [
+      {
+        familia: { id: 22, codigo: 'obras_preliminares', nombre: 'Obras preliminares' },
+        cantidadPartidas: 1,
+        total: 2_229_250,
+        totalClp: 2_229_250,
+      },
+      {
+        familia: { id: 23, codigo: 'obra_gruesa', nombre: 'Obra gruesa' },
+        cantidadPartidas: 1,
+        total: 770_750,
+        totalClp: 770_750,
+      },
+    ],
+  };
+}
+
+export function comparacionEjemplo(
+  parcial: Partial<ComparacionPresupuestoDto> = {},
+): ComparacionPresupuestoDto {
+  return {
+    base: versionPresupuestoEjemplo({ id: 11, numero: 1, estado: 'aprobado', vigente: true }),
+    nueva: versionPresupuestoEjemplo({ id: 12, numero: 2 }),
+    filas: [
+      {
+        codigo: '1.1',
+        cambio: 'modificada',
+        descripcion: 'Radier de hormigón',
+        base: partidaEjemplo({ totalClp: 1_000_000 }),
+        nueva: partidaEjemplo({ totalClp: 2_229_250 }),
+        diferenciaClp: 1_229_250,
+      },
+      {
+        codigo: '3.1',
+        cambio: 'nueva',
+        descripcion: 'Pintura',
+        base: null,
+        nueva: partidaEjemplo({ id: 40, codigo: '3.1', descripcion: 'Pintura', totalClp: 500_000 }),
+        diferenciaClp: 500_000,
+      },
+      {
+        codigo: '4.1',
+        cambio: 'eliminada',
+        descripcion: 'Cierre perimetral',
+        base: partidaEjemplo({ id: 41, codigo: '4.1', totalClp: 300_000 }),
+        nueva: null,
+        diferenciaClp: -300_000,
+      },
+      {
+        codigo: '2.1',
+        cambio: 'sin_cambios',
+        descripcion: 'Muros',
+        base: partidaEjemplo({ id: 42, codigo: '2.1', totalClp: 770_750 }),
+        nueva: partidaEjemplo({ id: 43, codigo: '2.1', totalClp: 770_750 }),
+        diferenciaClp: 0,
+      },
+    ],
+    totalBaseClp: 2_070_750,
+    totalNuevoClp: 3_500_000,
+    diferenciaClp: 1_429_250,
+    nuevas: 1,
+    eliminadas: 1,
+    modificadas: 1,
+    sinCambios: 1,
+    ...parcial,
+  };
+}
+
+export function loteEjemplo(parcial: Partial<ImportacionLoteDto> = {}): ImportacionLoteDto {
+  return {
+    id: 7,
+    tipo: 'presupuesto',
+    estado: 'previsualizado',
+    obra: { id: 1, codigoCentroCosto: 'CC-001', nombre: 'Local Parque Norte' },
+    nombreArchivo: 'presupuesto-local.xlsx',
+    tamanioBytes: 48_213,
+    totalFilas: 3,
+    filasValidas: 3,
+    filasConError: 0,
+    montoTotal: 3_000_000,
+    moneda: 'CLP',
+    presupuestoVersionId: null,
+    confirmadoEn: null,
+    creadoPor: { id: 1, nombre: 'Ana Administradora' },
+    creadoEn: '2026-11-19T12:00:00.000Z',
+    version: 1,
+    ...parcial,
+  };
+}
+
+export function filaImportacionEjemplo(
+  parcial: Partial<FilaImportacionDto> = {},
+): FilaImportacionDto {
+  return {
+    numeroFila: 2,
+    datos: {
+      codigo: '1.1',
+      familia: 'Obra gruesa',
+      descripcion: 'Radier',
+      unidad: 'm2',
+      cantidad: '120,5',
+      precioUnitario: '18500',
+    },
+    valida: true,
+    errores: [],
     ...parcial,
   };
 }

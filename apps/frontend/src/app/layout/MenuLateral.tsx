@@ -20,7 +20,13 @@ export function MenuLateral({ onNavegar }: MenuLateralProps) {
   const { pathname } = useLocation();
   const sesion = useSesion();
   const c = useTheme().palette.barraLateral;
-  const secciones = MENU.filter((seccion) => !seccion.soloAdmin || esAdmin(sesion));
+  const admin = esAdmin(sesion);
+  const secciones = MENU.filter((seccion) => !seccion.soloAdmin || admin)
+    .map((seccion) => ({
+      ...seccion,
+      items: seccion.items.filter((item) => !item.soloAdmin || admin),
+    }))
+    .filter((seccion) => seccion.items.length > 0);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>

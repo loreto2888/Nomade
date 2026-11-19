@@ -31,7 +31,12 @@ describe('mapa de permisos', () => {
 
   it('el usuario puede aprobar (el control es la no autoaprobación)', () => {
     expect(permisosDe(Rol.Usuario)).toEqual(
-      expect.arrayContaining(['oc.aprobar', 'lote.aprobar', 'eepp.aprobar']),
+      expect.arrayContaining([
+        'oc.aprobar',
+        'lote.aprobar',
+        'eepp.aprobar',
+        'presupuesto.aprobar',
+      ]),
     );
     expect(permisosDe(Rol.Usuario)).not.toContain('usuarios.crear');
     expect(permisosDe(Rol.Usuario)).not.toContain('auditoria.consultar');

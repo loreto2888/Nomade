@@ -37,6 +37,14 @@ export const actorUsuario: ActorAutenticado = {
   rol: Rol.Usuario,
 };
 
+/** Otra persona con rol `usuario` (para probar la no autoaprobación). */
+export const actorOtroUsuario: ActorAutenticado = {
+  ...actorUsuario,
+  id: 3,
+  correo: 'tomas@nomade.cl',
+  nombre: 'Tomás',
+};
+
 /** Reloj fijo: hoy es 2026-11-19 en Chile. */
 export class RelojFijo extends Reloj {
   constructor(

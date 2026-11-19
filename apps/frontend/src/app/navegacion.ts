@@ -33,6 +33,8 @@ export interface Pantalla {
   descripcion: string;
   /** Pantalla sin reglas definidas todavía: se muestra en el menú como «pendiente» (D-09). */
   pendiente?: boolean;
+  /** Solo la ven (y entran) los administradores, aunque el resto de su sección sea de todos. */
+  soloAdmin?: boolean;
 }
 
 export interface ItemMenu extends Pantalla {
@@ -210,8 +212,10 @@ export const MENU: SeccionMenu[] = [
         ruta: '/importaciones',
         etiqueta: 'Importación masiva',
         titulo: 'Importación masiva',
-        descripcion: 'Prepara la carga de presupuestos y registros desde archivos.',
+        descripcion:
+          'Carga presupuestos desde Excel o CSV: valida fila a fila, previsualiza los errores y crea la versión al confirmar.',
         icono: UploadFileOutlined,
+        soloAdmin: true,
       },
       {
         ruta: '/herramientas/asistencia-ia',

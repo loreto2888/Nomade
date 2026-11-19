@@ -1,6 +1,10 @@
 import '@testing-library/jest-dom/vitest';
-import { cleanup } from '@testing-library/react';
+import { cleanup, configure } from '@testing-library/react';
 import { afterEach } from 'vitest';
+
+// Las pantallas con DataGrid y varios diálogos tardan en montarse cuando los workers de Vitest
+// compiten por CPU: se da más margen a `findBy*`/`waitFor` (solo se agota si de verdad falla).
+configure({ asyncUtilTimeout: 4000 });
 
 // jsdom no implementa matchMedia: se evalúan min-width/max-width contra window.innerWidth
 // (1024 px por defecto), suficiente para los breakpoints de MUI.

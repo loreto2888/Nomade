@@ -8,6 +8,7 @@ import { CambiarClavePage } from '@/features/acceso/CambiarClavePage';
 import { LoginPage } from '@/features/acceso/LoginPage';
 import { AuditoriaPage } from '@/features/auditoria/AuditoriaPage';
 import { ClientesPage } from '@/features/clientes/ClientesPage';
+import { ImportacionesPage } from '@/features/importaciones/ImportacionesPage';
 import { FichaObraPage } from '@/features/obras/FichaObraPage';
 import { ObraFormPage } from '@/features/obras/ObraFormPage';
 import { ObrasPage } from '@/features/obras/ObrasPage';
@@ -27,6 +28,7 @@ const PAGINAS_IMPLEMENTADAS: Record<string, ReactElement> = {
   '/obras/:id/editar': <ObraFormPage />,
   '/obras/:id': <FichaObraPage />,
   '/clientes': <ClientesPage />,
+  '/importaciones': <ImportacionesPage />,
   '/proveedores': <ProveedoresPage />,
   '/admin/parametros': <ParametrosPage />,
   '/admin/usuarios': <UsuariosPage />,
@@ -52,7 +54,7 @@ function rutaEnConstruccion(pantalla: Pantalla, seccion: string, soloAdmin?: boo
 const rutasMenu = MENU.flatMap((seccion) =>
   seccion.items
     .filter((item) => item.ruta !== '/')
-    .map((item) => rutaEnConstruccion(item, seccion.titulo, seccion.soloAdmin)),
+    .map((item) => rutaEnConstruccion(item, seccion.titulo, seccion.soloAdmin || item.soloAdmin)),
 );
 
 const rutasInternas = PANTALLAS_INTERNAS.map((p) => rutaEnConstruccion(p, p.seccion, p.soloAdmin));

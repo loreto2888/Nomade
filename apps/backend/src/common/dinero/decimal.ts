@@ -76,3 +76,22 @@ export function dividir(
   const denominador = y.valor * 10n ** BigInt(x.escala);
   return Number(aTexto(dividirRedondeando(numerador, denominador), decimales));
 }
+
+/**
+ * Suma exacta de valores decimales con `decimales` decimales; un valor con más decimales se
+ * redondea (half-up) antes de sumarlo.
+ */
+export function sumar(
+  valores: readonly (number | string)[],
+  decimales: number,
+): number {
+  let acumulado = 0n;
+  for (const valor of valores) {
+    const x = parsear(valor);
+    acumulado +=
+      x.escala <= decimales
+        ? x.valor * 10n ** BigInt(decimales - x.escala)
+        : dividirRedondeando(x.valor, 10n ** BigInt(x.escala - decimales));
+  }
+  return Number(aTexto(acumulado, decimales));
+}

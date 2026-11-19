@@ -5,6 +5,10 @@ Seeds actuales:
 - `1795070000100_maestros-ficticios.sql` — fase 2: 3 clientes, 3 proveedores (uno con una cuenta bancaria
   falsa), valores de la UF alrededor del 19-11-2026 y las 4 obras del prototipo (una de ellas en UF).
   Es idempotente: no duplica si los registros ya existen.
+- `1795080000100_presupuesto-ficticio.sql` — fase 3: CC-001 con la versión 1 aprobada y vigente (partidas
+  del prototipo) y la versión 2 en borrador; CC-002 con un borrador en UF. Requiere un usuario: arranca el
+  backend una vez (crea el administrador inicial) antes de `npm run db:seed`; si no hay usuarios, falla con
+  un mensaje claro y no queda marcado como aplicado.
 
 Esta carpeta contiene datos **ficticios** para trabajar en local (por ejemplo, las obras de
 ejemplo del prototipo: Local Parque Norte, Oficinas Nueva Vista, Tienda Los Robles,
