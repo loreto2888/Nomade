@@ -59,7 +59,7 @@ describe('FichaObraPage (P05)', () => {
     expect(within(resumen).getByText(/UF de hoy: \$ 40\.000/)).toBeInTheDocument();
   });
 
-  it('solo Resumen y Presupuesto están implementadas; el resto figura como pendiente y explica qué incluirá', async () => {
+  it('Resumen, Presupuesto y Compras están implementadas; el resto figura como pendiente y explica qué incluirá', async () => {
     simularApi(base());
     const user = userEvent.setup();
     renderApp('/obras/1', { sesion: sesionUsuario });
@@ -69,17 +69,22 @@ describe('FichaObraPage (P05)', () => {
     expect(pestanas.map((t) => t.textContent?.replace('Pendiente', ''))).toEqual(
       PESTANAS_OBRA.map((p) => p.etiqueta),
     );
-    for (const pestana of pestanas.slice(0, 2)) {
-      expect(within(pestana).queryByText('Pendiente')).not.toBeInTheDocument();
-    }
-    for (const pestana of pestanas.slice(2)) {
-      expect(within(pestana).getByText('Pendiente')).toBeInTheDocument();
+    const implementadas = ['Resumen', 'Presupuesto', 'Compras'];
+    for (const pestana of pestanas) {
+      const etiqueta = pestana.textContent?.replace('Pendiente', '') ?? '';
+      if (implementadas.includes(etiqueta)) {
+        expect(within(pestana).queryByText('Pendiente')).not.toBeInTheDocument();
+      } else {
+        expect(within(pestana).getByText('Pendiente')).toBeInTheDocument();
+      }
     }
 
-    await user.click(screen.getByRole('tab', { name: /Compras/ }));
+    await user.click(screen.getByRole('tab', { name: /Documentos/ }));
     const panel = screen.getByRole('tabpanel');
-    expect(within(panel).getByRole('heading', { name: 'Compras: pendiente' })).toBeInTheDocument();
-    expect(within(panel).getByText(/fase 4/)).toBeInTheDocument();
+    expect(
+      within(panel).getByRole('heading', { name: 'Documentos: pendiente' }),
+    ).toBeInTheDocument();
+    expect(within(panel).getByText(/fase 5/)).toBeInTheDocument();
   });
 
   it('la pestaña queda en la URL (?pestana=) y se respeta al abrir el enlace', async () => {

@@ -8,6 +8,12 @@ import { CambiarClavePage } from '@/features/acceso/CambiarClavePage';
 import { LoginPage } from '@/features/acceso/LoginPage';
 import { AuditoriaPage } from '@/features/auditoria/AuditoriaPage';
 import { ClientesPage } from '@/features/clientes/ClientesPage';
+import { BandejaAprobacionPage } from '@/features/compras/BandejaAprobacionPage';
+import { CotizacionPage } from '@/features/compras/CotizacionPage';
+import { OrdenCompraPage } from '@/features/compras/OrdenCompraPage';
+import { OrdenesCompraPage } from '@/features/compras/OrdenesCompraPage';
+import { OrdenesTrabajoPage } from '@/features/compras/OrdenesTrabajoPage';
+import { OrdenTrabajoPage } from '@/features/compras/OrdenTrabajoPage';
 import { ImportacionesPage } from '@/features/importaciones/ImportacionesPage';
 import { FichaObraPage } from '@/features/obras/FichaObraPage';
 import { ObraFormPage } from '@/features/obras/ObraFormPage';
@@ -28,6 +34,12 @@ const PAGINAS_IMPLEMENTADAS: Record<string, ReactElement> = {
   '/obras/:id/editar': <ObraFormPage />,
   '/obras/:id': <FichaObraPage />,
   '/clientes': <ClientesPage />,
+  '/ordenes-trabajo': <OrdenesTrabajoPage />,
+  '/ordenes-trabajo/cotizaciones/:id': <CotizacionPage />,
+  '/ordenes-trabajo/:id': <OrdenTrabajoPage />,
+  '/ordenes-compra': <OrdenesCompraPage />,
+  '/ordenes-compra/:id': <OrdenCompraPage />,
+  '/pagos': <BandejaAprobacionPage />,
   '/importaciones': <ImportacionesPage />,
   '/proveedores': <ProveedoresPage />,
   '/admin/parametros': <ParametrosPage />,

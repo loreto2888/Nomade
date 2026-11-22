@@ -1,4 +1,4 @@
-/** Pestañas de la ficha de obra (plan §10.3). «Resumen» (fase 2) y «Presupuesto» (fase 3) están implementadas. */
+/** Pestañas de la ficha de obra (plan §10.3). «Resumen» (fase 2), «Presupuesto» (fase 3) y «Compras» (fase 4) están implementadas. */
 export interface PestanaObra {
   id: string;
   etiqueta: string;
@@ -14,11 +14,7 @@ export const PESTANAS_OBRA: PestanaObra[] = [
     etiqueta: 'Estados de pago',
     pendiente: 'Estados de pago, facturas de venta y cobranza (fase 7).',
   },
-  {
-    id: 'compras',
-    etiqueta: 'Compras',
-    pendiente: 'Órdenes de trabajo y de compra de la obra (fase 4).',
-  },
+  { id: 'compras', etiqueta: 'Compras' },
   {
     id: 'gastos',
     etiqueta: 'Gastos',

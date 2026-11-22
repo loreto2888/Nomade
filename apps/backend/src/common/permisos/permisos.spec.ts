@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   PERMISOS_ADMINISTRACION,
+  PERMISOS_ANULACION,
   PERMISOS_OPERATIVOS,
   permisosDe,
   tienePermiso,
@@ -12,11 +13,14 @@ describe('mapa de permisos', () => {
     for (const permiso of [
       ...PERMISOS_ADMINISTRACION,
       ...PERMISOS_OPERATIVOS,
+      ...PERMISOS_ANULACION,
     ]) {
       expect(tienePermiso(Rol.Admin, permiso)).toBe(true);
     }
     expect(permisosDe(Rol.Admin)).toHaveLength(
-      PERMISOS_ADMINISTRACION.length + PERMISOS_OPERATIVOS.length,
+      PERMISOS_ADMINISTRACION.length +
+        PERMISOS_OPERATIVOS.length +
+        PERMISOS_ANULACION.length,
     );
   });
 
@@ -24,8 +28,21 @@ describe('mapa de permisos', () => {
     for (const permiso of PERMISOS_ADMINISTRACION) {
       expect(tienePermiso(Rol.Usuario, permiso)).toBe(false);
     }
-    for (const permiso of PERMISOS_OPERATIVOS) {
+    for (const permiso of [...PERMISOS_OPERATIVOS, ...PERMISOS_ANULACION]) {
       expect(tienePermiso(Rol.Usuario, permiso)).toBe(true);
+    }
+  });
+
+  it('fase 4: aprobaciones de cotización y OT, y anulaciones de OC y OT para ambos roles', () => {
+    for (const rol of [Rol.Admin, Rol.Usuario]) {
+      expect(permisosDe(rol)).toEqual(
+        expect.arrayContaining([
+          'cotizacion.aprobar',
+          'ot.aprobar',
+          'oc.anular',
+          'ot.anular',
+        ]),
+      );
     }
   });
 

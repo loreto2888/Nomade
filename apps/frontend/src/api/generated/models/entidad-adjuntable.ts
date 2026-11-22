@@ -19,6 +19,9 @@ export const EntidadAdjuntable = {
     Obra: 'obra',
     Proveedor: 'proveedor',
     Cliente: 'cliente',
+    Cotizacion: 'cotizacion',
+    OrdenTrabajo: 'orden_trabajo',
+    OrdenCompra: 'orden_compra',
 } as const;
 
 export type EntidadAdjuntable = typeof EntidadAdjuntable[keyof typeof EntidadAdjuntable];

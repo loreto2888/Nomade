@@ -153,7 +153,7 @@ export const MENU: SeccionMenu[] = [
       },
       {
         ruta: '/pagos',
-        etiqueta: 'Pagos masivos',
+        etiqueta: 'Aprobaciones y pagos',
         titulo: 'Aprobación y pagos masivos',
         descripcion: 'Prepara lotes de pago y revisa documentos sujetos a aprobación.',
         icono: PaymentsOutlined,
@@ -286,6 +286,27 @@ export const PANTALLAS_INTERNAS: (Pantalla & { seccion: string; soloAdmin?: bool
     titulo: 'Ficha 360° de la obra',
     descripcion: 'Una vista integral de la operación y la situación financiera del proyecto.',
     seccion: 'Obras',
+  },
+  {
+    ruta: '/ordenes-trabajo/cotizaciones/:id',
+    etiqueta: 'Cotización',
+    titulo: 'Ficha de cotización',
+    descripcion: 'Cotización de un proveedor, su aprobación y la orden de trabajo que origina.',
+    seccion: 'Compras y gastos',
+  },
+  {
+    ruta: '/ordenes-trabajo/:id',
+    etiqueta: 'Orden de trabajo',
+    titulo: 'Ficha de orden de trabajo',
+    descripcion: 'Hitos de pago, órdenes de compra parciales y saldo de la OT.',
+    seccion: 'Compras y gastos',
+  },
+  {
+    ruta: '/ordenes-compra/:id',
+    etiqueta: 'Orden de compra',
+    titulo: 'Ficha de orden de compra',
+    descripcion: 'Montos, líneas, recepción y movimientos de la OC.',
+    seccion: 'Compras y gastos',
   },
   {
     ruta: '/eepp/:id',

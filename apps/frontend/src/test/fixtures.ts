@@ -1,7 +1,16 @@
 import type { SesionApi } from '@/api/auth';
-import type { UsuarioDto } from '@/api/generated';
+import type { CotizacionDto, OrdenCompraDto, OrdenTrabajoDto, UsuarioDto } from '@/api/generated';
 
-const PERMISOS_OPERATIVOS = ['oc.aprobar', 'lote.aprobar', 'eepp.aprobar', 'presupuesto.aprobar'];
+const PERMISOS_OPERATIVOS = [
+  'oc.aprobar',
+  'lote.aprobar',
+  'eepp.aprobar',
+  'presupuesto.aprobar',
+  'cotizacion.aprobar',
+  'ot.aprobar',
+  'oc.anular',
+  'ot.anular',
+];
 const PERMISOS_ADMIN = [
   'usuarios.consultar',
   'usuarios.crear',
@@ -469,3 +478,137 @@ export function filaImportacionEjemplo(
     ...parcial,
   };
 }
+
+// --- Compras (fase 4) ---------------------------------------------------------
+
+const documentoBase = {
+  obra: { id: 1, codigoCentroCosto: 'CC-001', nombre: 'Local Parque Norte', cerrada: false },
+  proveedor: { id: 4, rut: '76222333-3', razonSocial: 'Instalaciones Sur Ltda.' },
+  creadoPor: { id: 2, nombre: 'Camila Rojas' },
+  creadoEn: '2026-11-18T12:00:00.000Z',
+  actualizadoEn: '2026-11-18T12:00:00.000Z',
+  enviadoEn: null,
+  enviadoPor: null,
+  resueltoEn: null,
+  resueltoPor: null,
+  motivoResolucion: null,
+  estado: 'borrador' as const,
+  version: 1,
+};
+
+export function cotizacionEjemplo(parcial: Partial<CotizacionDto> = {}): CotizacionDto {
+  return {
+    ...documentoBase,
+    id: 8,
+    numero: 8,
+    folio: 'COT-000008',
+    categoria: { id: 21, codigo: 'subcontratos', nombre: 'Subcontratos' },
+    descripcion: 'Instalación eléctrica del local',
+    referenciaProveedor: 'P-77',
+    fecha: '2026-11-18',
+    validezHasta: null,
+    montoNeto: 10_000_000,
+    ordenTrabajo: null,
+    ...parcial,
+  };
+}
+
+export function ordenTrabajoEjemplo(parcial: Partial<OrdenTrabajoDto> = {}): OrdenTrabajoDto {
+  return {
+    ...documentoBase,
+    id: 4,
+    numero: 4,
+    folio: 'OT-000004',
+    categoria: { id: 21, codigo: 'subcontratos', nombre: 'Subcontratos' },
+    descripcion: 'Instalación eléctrica del local',
+    cotizacion: { id: 8, folio: 'COT-000008', estado: 'aprobada' },
+    montoNeto: 10_000_000,
+    fechaInicio: null,
+    fechaTermino: null,
+    hitos: [
+      {
+        id: 50,
+        numero: 1,
+        descripcion: 'Anticipo',
+        porcentaje: 30,
+        montoNeto: 3_000_000,
+        fechaEstimada: null,
+        porcentajeOrdenado: 20,
+        montoOrdenado: 2_000_000,
+        porcentajeDisponible: 10,
+        montoDisponible: 1_000_000,
+      },
+      {
+        id: 51,
+        numero: 2,
+        descripcion: 'Entrega',
+        porcentaje: 70,
+        montoNeto: 7_000_000,
+        fechaEstimada: '2026-12-15',
+        porcentajeOrdenado: 0,
+        montoOrdenado: 0,
+        porcentajeDisponible: 70,
+        montoDisponible: 7_000_000,
+      },
+    ],
+    montoOrdenado: 2_000_000,
+    porcentajeOrdenado: 20,
+    saldo: 8_000_000,
+    anuladoEn: null,
+    anuladoPor: null,
+    motivoAnulacion: null,
+    ...parcial,
+  };
+}
+
+export function ordenCompraEjemplo(parcial: Partial<OrdenCompraDto> = {}): OrdenCompraDto {
+  return {
+    ...documentoBase,
+    id: 12,
+    numero: 12,
+    folio: 'OC-000012',
+    tipo: 'materiales',
+    categoria: { id: 20, codigo: 'materiales', nombre: 'Materiales' },
+    descripcion: 'Cemento y fierro',
+    ordenTrabajo: null,
+    hito: null,
+    porcentaje: null,
+    fecha: '2026-11-19',
+    fechaEntrega: null,
+    afectaIva: true,
+    tasaIva: 19,
+    montoNeto: 874_455,
+    montoIva: 166_146,
+    montoTotal: 1_040_601,
+    lineas: [
+      {
+        id: 1,
+        numero: 1,
+        descripcion: 'Cemento',
+        unidad: 'saco',
+        cantidad: 120,
+        precioUnitario: 6500.5,
+        total: 780_060,
+      },
+      {
+        id: 2,
+        numero: 2,
+        descripcion: 'Fierro 12 mm',
+        unidad: 'barra',
+        cantidad: 10.5,
+        precioUnitario: 8990,
+        total: 94_395,
+      },
+    ],
+    recibidoEn: null,
+    recibidoPor: null,
+    fechaRecepcion: null,
+    observacionRecepcion: null,
+    anuladoEn: null,
+    anuladoPor: null,
+    motivoAnulacion: null,
+    ...parcial,
+  };
+}
+
+export const pagina = <T>(items: T[]) => ({ items, total: items.length, pagina: 1, tamanio: 10 });

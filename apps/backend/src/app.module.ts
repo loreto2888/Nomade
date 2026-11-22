@@ -11,7 +11,9 @@ import { AuditoriaModule } from './modules/auditoria/auditoria.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { CatalogosModule } from './modules/catalogos/catalogos.module.js';
 import { ClientesModule } from './modules/clientes/clientes.module.js';
+import { ComprasModule } from './modules/compras/compras.module.js';
 import { ImportacionesModule } from './modules/importaciones/importaciones.module.js';
+import { MovimientosModule } from './modules/movimientos/movimientos.module.js';
 import { ObrasModule } from './modules/obras/obras.module.js';
 import { ParametrosModule } from './modules/parametros/parametros.module.js';
 import { PresupuestosModule } from './modules/presupuestos/presupuestos.module.js';
@@ -53,6 +55,8 @@ import { UsuariosModule } from './modules/usuarios/usuarios.module.js';
     ObrasModule,
     PresupuestosModule,
     ImportacionesModule,
+    MovimientosModule,
+    ComprasModule,
     AdjuntosModule,
     SaludModule,
   ],

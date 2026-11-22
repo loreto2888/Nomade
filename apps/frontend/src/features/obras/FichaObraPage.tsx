@@ -18,10 +18,11 @@ import { CabeceraPagina } from '@/components/CabeceraPagina';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { StatusChip } from '@/components/StatusChip';
 import { PESTANAS_OBRA, pestanaValida } from './pestanas';
+import { ComprasObraTab } from '@/features/compras/ComprasObraTab';
 import { PresupuestoTab } from '@/features/presupuestos/PresupuestoTab';
 import { ResumenObra } from './ResumenObra';
 
-/** P05 — Ficha de la obra con pestañas. Implementadas: «Resumen» (fase 2) y «Presupuesto» (fase 3). */
+/** P05 — Ficha de la obra con pestañas. Implementadas: «Resumen» (fase 2), «Presupuesto» (fase 3) y «Compras» (fase 4). */
 export function FichaObraPage() {
   const { id } = useParams();
   const navegar = useNavigate();
@@ -140,6 +141,8 @@ export function FichaObraPage() {
           <ResumenObra resumen={consulta.data} />
         ) : pestana === 'presupuesto' ? (
           <PresupuestoTab obra={obra} />
+        ) : pestana === 'compras' ? (
+          <ComprasObraTab obra={obra} />
         ) : (
           <Card>
             <CardContent sx={{ py: 6, textAlign: 'center' }}>

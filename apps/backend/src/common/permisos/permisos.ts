@@ -30,11 +30,21 @@ export const PERMISOS_OPERATIVOS = [
   'lote.aprobar',
   'eepp.aprobar',
   'presupuesto.aprobar',
+  'cotizacion.aprobar',
+  'ot.aprobar',
 ] as const;
+
+/**
+ * Anulaciones (fase 4): también las tienen ambos roles, pero se declaran aparte para que un perfil
+ * fino futuro pueda restringirlas sin tocar los controladores. No exigen control de autoaprobación.
+ */
+export const PERMISOS_ANULACION = ['oc.anular', 'ot.anular'] as const;
 
 export type PermisoAdministracion = (typeof PERMISOS_ADMINISTRACION)[number];
 export type PermisoOperativo = (typeof PERMISOS_OPERATIVOS)[number];
-export type Permiso = PermisoAdministracion | PermisoOperativo;
+export type PermisoAnulacion = (typeof PERMISOS_ANULACION)[number];
+export type Permiso =
+  PermisoAdministracion | PermisoOperativo | PermisoAnulacion;
 
 const ADMINISTRACION: ReadonlySet<string> = new Set(PERMISOS_ADMINISTRACION);
 
@@ -55,6 +65,7 @@ export function permisosDe(rol: Rol): Permiso[] {
   const todos: readonly Permiso[] = [
     ...PERMISOS_ADMINISTRACION,
     ...PERMISOS_OPERATIVOS,
+    ...PERMISOS_ANULACION,
   ];
   return todos.filter((permiso) => tienePermiso(rol, permiso));
 }

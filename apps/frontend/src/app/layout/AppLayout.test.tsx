@@ -43,14 +43,14 @@ describe('AppLayout', () => {
     const { router } = renderApp('/');
 
     const nav = screen.getByRole('navigation', { name: 'Navegación principal' });
-    await user.click(within(nav).getByRole('link', { name: 'Órdenes de compra' }));
+    await user.click(within(nav).getByRole('link', { name: 'Facturas' }));
 
-    expect(router.state.location.pathname).toBe('/ordenes-compra');
+    expect(router.state.location.pathname).toBe('/facturas');
     expect(
-      screen.getByRole('heading', { level: 1, name: 'Órdenes de compra' }),
+      screen.getByRole('heading', { level: 1, name: 'Facturas y documentos de egreso' }),
     ).toBeInTheDocument();
     expect(screen.getByText('En construcción')).toBeInTheDocument();
-    expect(within(nav).getByRole('link', { name: 'Órdenes de compra' })).toHaveAttribute(
+    expect(within(nav).getByRole('link', { name: 'Facturas' })).toHaveAttribute(
       'aria-current',
       'page',
     );
@@ -59,7 +59,7 @@ describe('AppLayout', () => {
     );
     const migas = screen.getByRole('navigation', { name: 'Ubicación' });
     expect(within(migas).getByText('Espacio de trabajo')).toBeInTheDocument();
-    expect(within(migas).getByText('Órdenes de compra')).toBeInTheDocument();
+    expect(within(migas).getByText('Facturas')).toBeInTheDocument();
   });
 
   it('muestra la página 404 en español para rutas desconocidas', () => {

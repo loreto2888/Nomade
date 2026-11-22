@@ -30,6 +30,8 @@ export const SEMANTICA: Record<string, Semantica> = {
   rechazada: { color: 'error' },
   cerrado: { color: 'default', variant: 'outlined' },
   anulado: { color: 'default', variant: 'outlined' },
+  anulada: { color: 'default', variant: 'outlined' },
+  recibida: { color: 'primary' },
   activo: { color: 'success' },
   inactivo: { color: 'default' },
 };

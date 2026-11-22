@@ -9,6 +9,9 @@ Seeds actuales:
   del prototipo) y la versión 2 en borrador; CC-002 con un borrador en UF. Requiere un usuario: arranca el
   backend una vez (crea el administrador inicial) antes de `npm run db:seed`; si no hay usuarios, falla con
   un mensaje claro y no queda marcado como aplicado.
+- `1795090000100_compras-ficticias.sql` — fase 4: en CC-001, una cotización aprobada de Instalaciones Sur,
+  su OT aprobada (hitos 30/40/30), una OC parcial aprobada del hito 1 con su compromiso y una OC de
+  materiales en revisión. Requiere un usuario y no hace nada si CC-001 ya tiene cotizaciones.
 
 Esta carpeta contiene datos **ficticios** para trabajar en local (por ejemplo, las obras de
 ejemplo del prototipo: Local Parque Norte, Oficinas Nueva Vista, Tienda Los Robles,
